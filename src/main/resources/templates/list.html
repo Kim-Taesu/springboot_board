@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Board List</title>
+</head>
+<body>
+
+<h1>Board List</h1>
+<div th:if="${message}">
+    <h2 th:text="${message}"></h2>
+</div>
+<div th:unless="${#lists.isEmpty(boards)}">
+    <ul th:each="board: ${boards}">
+        <a th:href="@{/detail(id=${board.getId()})}" th:text="${board.getTitle()}"></a>
+        <p th:text="'작성자 : '+${board.getCreatedBy()}"></p>
+        <p th:text="'작성일 : '+${board.getCreateDate()}"></p>
+        <hr/>
+    </ul>
+</div>
+
+<button onclick="location.href='/create'">게시글 생성</button>
+<button onclick="location.href='/account/logout'">로그아웃</button>
+
+</body>
+</html>

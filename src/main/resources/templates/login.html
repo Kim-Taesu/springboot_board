@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Login Page</title>
+</head>
+<body>
+<h2>Login</h2>
+
+<div th:if="${message}">
+    <h2 th:text="${message}"></h2>
+</div>
+<form action="/account/login" method="post">
+    <input type="text" name="id" placeholder="id를 입력하세요" required/>
+    <input type="text" name="password" placeholder="pw를 입력하세요." required/>
+    <button type="submit">로그인</button>
+</form>
+
+<hr/>
+<button type="button" onclick="location.href='/account/signUp'">회원가입</button>
+
+</body>
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Page</title>
+</head>
+<body>
+<h1>Detail Page</h1>
+<form action="/update" method="post">
+    id : <input name="id" th:value="${board.getId()}" readonly> <br/>
+    title : <input name="title" th:value="${board.getTitle()}"><br/>
+    content : <input name="content" th:value="${board.getContent()}"><br/>
+    createdBy : <input name="createdBy" th:value="${board.getCreatedBy()}" readonly><br/>
+    createDate : <input name="createDate" th:value="${board.getCreateDate()}" readonly><br/>
+    lastModifiedBy : <input name="lastModifiedBy" th:value="${board.getLastModifiedBy()}" readonly><br/>
+    lastModifiedDate : <input name="lastModifiedDate" th:value="${board.getLastModifiedDate()}" readonly><br/>
+    <input type="submit" th:value="수정">
+</form>
+<hr/>
+<button type="submit" onclick="location.href='/list'">목록</button>
+<button type="submit" onclick="location.href='/delete/${board.getId()}'">게시글 삭제</button>
+<hr/>
+<h4>comments</h4>
+<div th:unless="${#lists.isEmpty(board.getComments())}">
+    <ul th:each="comment: ${board.getComments()}">
+        <p th:text="${comment.getUserName()}"></p>
+        <p th:text="${comment.getDetail()}"></p>
+        <hr/>
+    </ul>
+</div>
+</body>
+</html>
