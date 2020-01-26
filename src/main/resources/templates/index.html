@@ -8,8 +8,14 @@
 
 <h1>Board Example</h1>
 
+<p>
 <button type="button" onclick="location.href='/list'">게시판 목록</button>
-<button type="button" onclick="location.href='/account/login'">로그인</button>
-
+</p>
+<p th:if="${session['account']}">
+    <button type="button" onclick="location.href='/account/logout'">로그아웃</button>
+</p>
+<p th:if="!${session['account']}">
+    <button type="button" onclick="location.href='/account/login'">로그인</button>
+</p>
 </body>
 </html>

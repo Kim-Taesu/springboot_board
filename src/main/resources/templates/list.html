@@ -8,17 +8,18 @@
 
 <h1>Board List</h1>
 <div th:if="${message}">
-    <h2 th:text="${message}"></h2>
+    <h2 th:text="'message : '+${message}"></h2>
 </div>
 <div th:unless="${#lists.isEmpty(boards)}">
     <ul th:each="board: ${boards}">
-        <a th:href="@{/detail(id=${board.getId()})}" th:text="${board.getTitle()}"></a>
+        <a th:href="@{/detail/{id}(id=${board.getId()})}" th:text="${board.getTitle()}"></a>
         <p th:text="'작성자 : '+${board.getCreatedBy()}"></p>
         <p th:text="'작성일 : '+${board.getCreateDate()}"></p>
         <hr/>
     </ul>
 </div>
 
+<button onclick="location.href='/'">HOME</button>
 <button onclick="location.href='/create'">게시글 생성</button>
 <button onclick="location.href='/account/logout'">로그아웃</button>
 

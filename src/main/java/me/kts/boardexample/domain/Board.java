@@ -1,6 +1,9 @@
 package me.kts.boardexample.domain;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import org.springframework.data.annotation.*;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -13,7 +16,8 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Board {
-    @Id @NonNull
+    @Id
+    @NonNull
     String id;
 
     @NonNull
@@ -34,4 +38,10 @@ public class Board {
 
     @LastModifiedDate
     Date lastModifiedDate;
+
+    @Override
+    public String toString() {
+        return "생성 완료 (" +
+                "title: " + title + ')';
+    }
 }

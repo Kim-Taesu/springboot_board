@@ -6,27 +6,54 @@
 </head>
 <body>
 <h1>Detail Page</h1>
-<form action="/update" method="post">
-    id : <input name="id" th:value="${board.getId()}" readonly> <br/>
-    title : <input name="title" th:value="${board.getTitle()}"><br/>
-    content : <input name="content" th:value="${board.getContent()}"><br/>
-    createdBy : <input name="createdBy" th:value="${board.getCreatedBy()}" readonly><br/>
-    createDate : <input name="createDate" th:value="${board.getCreateDate()}" readonly><br/>
-    lastModifiedBy : <input name="lastModifiedBy" th:value="${board.getLastModifiedBy()}" readonly><br/>
-    lastModifiedDate : <input name="lastModifiedDate" th:value="${board.getLastModifiedDate()}" readonly><br/>
-    <input type="submit" th:value="수정">
+<div th:if="${message}">
+    <h2 th:text="'message : ' + ${message}"></h2>
+</div>
+<form action="#" th:action="@{/update/{id}(id=${board.getId()})}" method="post">
+    <div id="board-info" th:object="${board}">
+        <h4>board info</h4>
+        <p>
+            title : <input th:value="*{getTitle()}" name="title"></p>
+        <p>
+            content : <input th:type="text" name="content" th:value="*{getContent()}" style="width: 50%"></p>
+        <p>
+            createdBy : <input name="createdBy" th:value="*{getCreatedBy()}" style="border: none" readonly>
+        <p/>
+        <p>
+            createDate : <input name="createDate" th:value="*{getCreateDate()}" style="border: none" readonly>
+        </p>
+        <p>
+            lastModifiedBy : <input name="lastModifiedBy" th:value="*{getLastModifiedBy()}" style="border: none"
+                                    readonly>
+        </p>
+        <p>
+            lastModifiedDate : <input name="lastModifiedDate" th:value="*{getLastModifiedDate()}"
+                                      style="border: none" readonly><br/>
+        </p>
+        <input type="submit" th:value="수정">
+    </div>
 </form>
-<hr/>
-<button type="submit" onclick="location.href='/list'">목록</button>
-<button type="submit" onclick="location.href='/delete/${board.getId()}'">게시글 삭제</button>
 <hr/>
 <h4>comments</h4>
 <div th:unless="${#lists.isEmpty(board.getComments())}">
     <ul th:each="comment: ${board.getComments()}">
-        <p th:text="${comment.getUserName()}"></p>
-        <p th:text="${comment.getDetail()}"></p>
+        <form th:action="@{/update/{boardId}/comment/{id}(id=${comment.getId()},boardId=${board.getId()})}"
+              th:method="post">
+            <p th:text="'사용자 : ' + ${comment.getUserId()}"></p>
+            <p>comment : <input name="content" th:value="${comment.getContent()}"></p>
+            <input type="submit" th:value="수정">
+        </form>
+        <a th:href="@{/delete/{boardId}/comment/{id}(boardId=${board.getId()},id=${comment.getId()})}">comment 삭제</a>
         <hr/>
     </ul>
 </div>
+<form th:action="@{/comment/{id}(id=${board.getId()})}" action="#" th:method="post">
+    <input type="text" name="content">
+    <input type="submit">
+</form>
+
+<hr/>
+<button type="button" onclick="location.href='/list'">목록</button>
+<a th:href="@{/delete/{id}(id=${board.getId()})}">게시글 삭제</a>
 </body>
 </html>

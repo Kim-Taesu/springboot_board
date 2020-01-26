@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import javax.servlet.http.HttpSession;
+
 @Controller
 @RequestMapping(value = "/account")
 @SessionAttributes("account")
@@ -33,9 +35,11 @@ public class AccountController {
 
     @PostMapping("/login")
     public String login(Model model,
+                        HttpSession httpSession,
                         @RequestParam String id,
                         @RequestParam String password,
                         RedirectAttributes attributes) {
+        Object account = httpSession.getAttribute("account");
         Object result = service.login(id, password);
         if (result.getClass().equals(Account.class)) {
             model.addAttribute("account", result);

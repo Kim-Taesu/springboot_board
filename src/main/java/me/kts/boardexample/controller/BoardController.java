@@ -1,16 +1,21 @@
 package me.kts.boardexample.controller;
 
+import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import me.kts.boardexample.domain.Account;
 import me.kts.boardexample.domain.Board;
 import me.kts.boardexample.service.BoardService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import javax.jws.WebParam;
 import javax.servlet.http.HttpSession;
 
+@Slf4j
 @Controller
 public class BoardController {
 
@@ -41,10 +46,10 @@ public class BoardController {
         }
     }
 
-    @GetMapping("/detail")
+    @GetMapping("/detail/{id}")
     public String detailPage(
             Model model,
-            @RequestParam String id,
+            @PathVariable String id,
             HttpSession httpSession,
             RedirectAttributes attributes) {
         Object account = httpSession.getAttribute("account");
@@ -54,7 +59,7 @@ public class BoardController {
         } else {
             Object result = service.detailBoard(id);
             if (result.getClass().equals(Board.class)) {
-                model.addAttribute("board", (Board) result);
+                model.addAttribute("board", result);
                 return "detail";
             } else {
                 attributes.addFlashAttribute("message", result);
@@ -74,29 +79,73 @@ public class BoardController {
         return "redirect:/list";
     }
 
-    @PostMapping("/update")
+    @PostMapping("/update/{id}")
     public String update(
             HttpSession httpSession,
             RedirectAttributes attributes,
-            @RequestParam String id,
+            @PathVariable String id,
             @RequestParam String title,
             @RequestParam String content) {
         Account account = (Account) httpSession.getAttribute("account");
-        attributes.addFlashAttribute("message", service.update(account.getId(), id, title, content));
-        return "redirect:/list";
+        String result = service.update(account.getId(), id, title, content);
+        attributes.addFlashAttribute("message", result);
+//        return "redirect:/list";
+        return "redirect:/detail/" + id;
     }
 
-    @DeleteMapping("/delete")
+    @GetMapping("/delete/{id}")
     public String delete(
             HttpSession httpSession,
-            Model model,
             RedirectAttributes attributes,
             @PathVariable String id) {
         Account account = (Account) httpSession.getAttribute("account");
-
-        service.delete(id);
-        return "redirect:/list";
+        @NonNull String userId = account.getId();
+        String result = service.delete(userId, id);
+        attributes.addFlashAttribute("message", result);
+        if (result.equals("delete success")) {
+            return "redirect:/list";
+        } else {
+            return "redirect:/detail/" + id;
+        }
     }
 
+    @PostMapping("/comment/{id}")
+    public String createComment(
+            HttpSession httpSession,
+            @PathVariable String id,
+            @RequestParam String content,
+            RedirectAttributes attributes) {
+        Account account = (Account) httpSession.getAttribute("account");
+        String userId = account.getId();
+
+        String result = service.createComment(userId, id, content);
+        attributes.addFlashAttribute("message", result);
+        return "redirect:/detail/" + id;
+    }
+
+    @PostMapping("/update/{boardId}/comment/{id}")
+    public String updateComment(
+            HttpSession httpSession,
+            RedirectAttributes attributes,
+            @PathVariable String boardId,
+            @PathVariable String id,
+            @RequestParam String content) {
+        Account account = (Account) httpSession.getAttribute("account");
+        String result = service.updateComment(account.getId(), id, boardId, content);
+        attributes.addFlashAttribute("message", result);
+        return "redirect:/detail/" + boardId;
+    }
+
+    @GetMapping("/delete/{boardId}/comment/{id}")
+    public String deleteComment(
+            HttpSession httpSession,
+            RedirectAttributes attributes,
+            @PathVariable String boardId,
+            @PathVariable String id) {
+        Account account = (Account) httpSession.getAttribute("account");
+        String result = service.deleteComment(account.getId(), boardId, id);
+        attributes.addFlashAttribute("message", result);
+        return "redirect:/detail/" + boardId;
+    }
 
 }

@@ -38,7 +38,7 @@ public class BoardControllerTest {
     @Test
     public void index() throws Exception {
         // given
-        given(service.viewAll()).willReturn(new ArrayList<Board>());
+        given(service.viewAll()).willReturn(new ArrayList<>());
 
         // when
         ResultActions actions = mockMvc.perform(get("/list"))
@@ -47,7 +47,7 @@ public class BoardControllerTest {
         // then
         actions
                 .andExpect(status().isOk())
-                .andExpect(view().name("list"));
+                .andExpect(view().name("login"));
     }
 
     @Test
