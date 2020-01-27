@@ -14,7 +14,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.ArrayList;
-import java.util.Date;
 
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -54,11 +53,11 @@ public class BoardControllerTest {
     public void create() throws Exception {
         // given
         Board board = new Board();
-        board.setId("id");
+        board.setBoardId("id");
         board.setTitle("title");
         board.setCreatedBy("kts");
-        board.setCreateDate(new Date());
-        given(service.create("id", "title", "kts")).willReturn(board.toString());
+//        board.setCreateDate(new Date());
+        given(service.create(board.getCreatedBy(), board)).willReturn(board.toString());
 
         // when
         ResultActions actions = mockMvc.perform(post("/create")

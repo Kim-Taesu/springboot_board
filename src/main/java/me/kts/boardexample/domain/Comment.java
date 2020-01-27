@@ -11,12 +11,21 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @NoArgsConstructor
 public class Comment {
 
-    @Id @NonNull
-    String id;
+    @Id
+    @NonNull
+    String commentId;
 
     @NonNull
     String userId;
 
     @NonNull
     String content;
+
+    String createdBy;
+
+    String createDate;
+
+    String lastModifiedBy;
+
+    String lastModifiedDate;
 }

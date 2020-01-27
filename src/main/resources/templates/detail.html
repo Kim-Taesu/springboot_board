@@ -7,53 +7,48 @@
 <body>
 <h1>Detail Page</h1>
 <div th:if="${message}">
-    <h2 th:text="'message : ' + ${message}"></h2>
+    <h4 th:text="'message : ' + ${message}"></h4>
 </div>
-<form action="#" th:action="@{/update/{id}(id=${board.getId()})}" method="post">
+<form action="#" method="post" th:action="@{/update/{boardId}(boardId=${board.getBoardId()})}">
     <div id="board-info" th:object="${board}">
-        <h4>board info</h4>
+        <h3>board info</h3>
         <p>
-            title : <input th:value="*{getTitle()}" name="title"></p>
+            title : <input name="title" th:value="*{getTitle()}"></p>
         <p>
-            content : <input th:type="text" name="content" th:value="*{getContent()}" style="width: 50%"></p>
-        <p>
-            createdBy : <input name="createdBy" th:value="*{getCreatedBy()}" style="border: none" readonly>
-        <p/>
-        <p>
-            createDate : <input name="createDate" th:value="*{getCreateDate()}" style="border: none" readonly>
-        </p>
-        <p>
-            lastModifiedBy : <input name="lastModifiedBy" th:value="*{getLastModifiedBy()}" style="border: none"
-                                    readonly>
-        </p>
-        <p>
-            lastModifiedDate : <input name="lastModifiedDate" th:value="*{getLastModifiedDate()}"
-                                      style="border: none" readonly><br/>
-        </p>
-        <input type="submit" th:value="수정">
+            content : <input name="content" style="width: 50%" th:type="text" th:value="*{getContent()}"></p>
+        <p th:name="createdBy" th:text="'createdBy : ' + *{getCreatedBy()}"></p>
+        <p th:name="createDate" th:text="'createDate : ' + *{getCreateDate()}"></p>
+        <p th:name="lastModifiedBy" th:text="'lastModifiedBy : ' + *{getLastModifiedBy()}"></p>
+        <p th:name="lastModifiedDate" th:text="'lastModifiedDate : ' + *{getLastModifiedDate()}"></p>
+        <input th:value="수정" type="submit">
     </div>
 </form>
 <hr/>
-<h4>comments</h4>
+<h3>comments</h3>
 <div th:unless="${#lists.isEmpty(board.getComments())}">
     <ul th:each="comment: ${board.getComments()}">
-        <form th:action="@{/update/{boardId}/comment/{id}(id=${comment.getId()},boardId=${board.getId()})}"
+        <form th:action="@{/update/{boardId}/comment/{commentId}(commentId=${comment.getCommentId()},boardId=${board.getBoardId()})}"
               th:method="post">
             <p th:text="'사용자 : ' + ${comment.getUserId()}"></p>
             <p>comment : <input name="content" th:value="${comment.getContent()}"></p>
-            <input type="submit" th:value="수정">
+            <p th:text="'createdBy : ' + ${comment.getCreatedBy()}"></p>
+            <p th:text="'createDate : ' + ${comment.getCreateDate()}"></p>
+            <p th:text="'lastModifiedBy : ' + ${comment.getLastModifiedBy()}"></p>
+            <p th:text="'lastModifiedDate : ' + ${comment.getLastModifiedDate()}"></p>
+            <input th:value="수정" type="submit">
         </form>
-        <a th:href="@{/delete/{boardId}/comment/{id}(boardId=${board.getId()},id=${comment.getId()})}">comment 삭제</a>
+        <a th:href="@{/delete/{boardId}/comment/{commentId}(boardId=${board.getBoardId()},commentId=${comment.getCommentId()})}">comment
+            삭제</a>
         <hr/>
     </ul>
 </div>
-<form th:action="@{/comment/{id}(id=${board.getId()})}" action="#" th:method="post">
-    <input type="text" name="content">
+<form action="#" th:action="@{/comment/{boardId}(boardId=${board.getBoardId()})}" th:method="post">
+    <input name="content" type="text">
     <input type="submit">
 </form>
 
 <hr/>
-<button type="button" onclick="location.href='/list'">목록</button>
-<a th:href="@{/delete/{id}(id=${board.getId()})}">게시글 삭제</a>
+<button onclick="location.href='/list'" type="button">목록</button>
+<a th:href="@{/delete/{boardId}(boardId=${board.getBoardId()})}">게시글 삭제</a>
 </body>
 </html>

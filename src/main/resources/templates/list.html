@@ -7,12 +7,16 @@
 <body>
 
 <h1>Board List</h1>
+
+<div th:if="${account}">
+    <h4 th:text="'Whelcom '+${account.getName()}"></h4>
+</div>
 <div th:if="${message}">
-    <h2 th:text="'message : '+${message}"></h2>
+    <h4 th:text="'message : '+${message}"></h4>
 </div>
 <div th:unless="${#lists.isEmpty(boards)}">
-    <ul th:each="board: ${boards}">
-        <a th:href="@{/detail/{id}(id=${board.getId()})}" th:text="${board.getTitle()}"></a>
+    <ul th:border="1px" th:each="board: ${boards}">
+        <a th:href="@{/detail/{boardId}(boardId=${board.getBoardId()})}" th:text="${board.getTitle()}"></a>
         <p th:text="'작성자 : '+${board.getCreatedBy()}"></p>
         <p th:text="'작성일 : '+${board.getCreateDate()}"></p>
         <hr/>

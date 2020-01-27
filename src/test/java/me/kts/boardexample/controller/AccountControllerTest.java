@@ -76,6 +76,7 @@ public class AccountControllerTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(view().name("redirect:/list"));
 
+        //---------------------------------------------------------------------------//
 
         // given
         given(service.login("id2", "password")).willReturn("id err");
@@ -99,10 +100,7 @@ public class AccountControllerTest {
         account.setId("kts");
         account.setPassword("pw");
         account.setName("kts");
-        given(service.signUp(
-                account.getId(),
-                account.getPassword(),
-                account.getName()))
+        given(service.signUp(account))
                 .willReturn("success");
 
         // when
@@ -122,10 +120,7 @@ public class AccountControllerTest {
         account1.setId("kts222");
         account1.setPassword("pw");
         account1.setName("kts");
-        given(service.signUp(
-                account1.getId(),
-                account1.getPassword(),
-                account1.getName()))
+        given(service.signUp(account))
                 .willReturn("fail");
 
         // when

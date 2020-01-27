@@ -1,14 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Create Page</title>
 </head>
 <body>
 <h1>Create Page</h1>
+<div th:if="${message}">
+    <h4 th:text="'message : ' + ${message}"></h4>
+</div>
 <form action="/create" method="post">
-    title: <input type="text" name="title" required>
-    content: <input type="text" name="content">
+    <p>
+        title: <input name="title" required type="text">
+    </p>
+    <p>
+        content: <input name="content" type="text">
+    </p>
     <input type="submit">
 </form>
 </body>

@@ -22,19 +22,19 @@ public class AccountService {
             if (account.getPassword().equals(password)) {
                 return account;
             } else {
-                return "err(비밀번호 오류)";
+                return "error : 비밀번호 오류";
             }
         } else {
-            return "err(일치하는 id 없음)";
+            return "error : 일치하는 id 없음";
         }
     }
 
-    public String signUp(String id, String password, String name) {
-        Optional<Account> byId = repository.findById(id);
+    public String signUp(Account account) {
+        Optional<Account> byId = repository.findById(account.getId());
         if (byId.isPresent()) {
-            return "err(이미 id가 존재)";
+            return "error : 이미 id가 존재";
         } else {
-            repository.save(new Account(id, password, name));
+            repository.save(account);
             return "success";
         }
     }

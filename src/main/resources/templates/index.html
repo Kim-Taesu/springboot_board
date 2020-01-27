@@ -7,15 +7,29 @@
 <body>
 
 <h1>Board Example</h1>
-
-<p>
-<button type="button" onclick="location.href='/list'">게시판 목록</button>
-</p>
-<p th:if="${session['account']}">
-    <button type="button" onclick="location.href='/account/logout'">로그아웃</button>
-</p>
-<p th:if="!${session['account']}">
-    <button type="button" onclick="location.href='/account/login'">로그인</button>
-</p>
+<div th:if="${session['account']}">
+    <h4 th:text="'Welcom : '+${session['account'].getName()}"></h4>
+</div>
+<div th:if="!${session['account']}">
+    <h4 th:text="${message}"></h4>
+</div>
+<div th:if="${session['account']}">
+    <h4>board service</h4>
+    <p>
+        <button onclick="location.href='/list'" type="button">게시판 목록</button>
+    </p>
+    <hr/>
+    <h4>account service</h4>
+    <p th:if="${session['account']}">
+        <button onclick="location.href='/account/view'" type="button">사용자 정보</button>
+        <button onclick="location.href='/account/logout'" type="button">로그아웃</button>
+    </p>
+</div>
+<div th:if="!${session['account']}">
+    <p>
+        <button onclick="location.href='/account/login'" type="button">로그인</button>
+        <button onclick="location.href='/account/signUp'" type="button">회원가입</button>
+    </p>
+</div>
 </body>
 </html>
