@@ -3,29 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <title>Board List</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 </head>
 <body>
+<div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom shadow-sm">
+    <a class="my-0 mr-md-auto text-dark" href="/">Home</a>
 
-<h1>Board List</h1>
+    <nav class="my-2 my-md-0 mr-md-3" th:if="${session['account']}">
+        <span class="p-2 text-dark" th:text="${session['account'].getId()}+'님 환영합니다.'">Id</span>
+        <span class="p-2 text-dark" th:text="'방문시각 : '+${session['visitTime']}">Visit</span>
+        <span class="p-2 text-dark" th:text="'사용시간 : '+${session['useTime']}">Use</span>
+    </nav>
 
-<div th:if="${account}">
-    <h4 th:text="'Whelcom '+${account.getName()}"></h4>
+    <div th:if="${session['account']}">
+        <a role="button" class="btn btn-outline-danger" href="/account/logout">Logout</a>
+    </div>
+    <div th:if="!${session['account']}">
+        <a role="button" class="btn btn-outline-primary" href="/account/login">Login</a>
+        <a role="button" class="btn btn-outline-success" href="/account/signUp">Sign up</a>
+    </div>
 </div>
-<div th:if="${message}">
-    <h4 th:text="'message : '+${message}"></h4>
-</div>
-<div th:unless="${#lists.isEmpty(boards)}">
-    <ul th:border="1px" th:each="board: ${boards}">
-        <a th:href="@{/detail/{boardId}(boardId=${board.getBoardId()})}" th:text="${board.getTitle()}"></a>
-        <p th:text="'작성자 : '+${board.getCreatedBy()}"></p>
-        <p th:text="'작성일 : '+${board.getCreateDate()}"></p>
-        <hr/>
-    </ul>
+
+<div class="card border-danger mb-3" th:if="${message}">
+    <div class="card-body text-danger">
+        <h5 class="card-title">Message</h5>
+        <p class="card-text" th:text="${message}"></p>
+    </div>
 </div>
 
-<button onclick="location.href='/'">HOME</button>
-<button onclick="location.href='/create'">게시글 생성</button>
-<button onclick="location.href='/account/logout'">로그아웃</button>
+<div class="container">
 
+    <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+        <h1 class="display-4">Board List</h1>
+    </div>
+
+    <table class="table table-striped" style="text-align: center">
+        <thead class="thead-dark">
+        <tr>
+            <th scope="col">제목</th>
+            <th scope="col">작성자</th>
+            <th scope="col">작성일</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:unless="${#lists.isEmpty(boards)}" th:each="board: ${boards}">
+            <td th:href="@{/detail/{boardId}(boardId=${board.getBoardId()})}" th:text="${board.getTitle()}"></td>
+            <td th:text="${board.getCreatedBy()}"></td>
+            <td th:text="${board.getCreateDate()}"></td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(boards)}">
+            <td colspan="3" style="text-align: center">조회된 결과가 없습니다.</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="btn-group" role="group" aria-label="Basic example">
+        <button type="button" class="btn btn-primary" onclick="location.href='/'">HOME</button>
+        <button type="button" class="btn btn-success" onclick="location.href='/create'">게시글 생성</button>
+        <button type="button" class="btn btn-danger" onclick="location.href='/account/logout'">로그아웃</button>
+    </div>
+</div>
 </body>
+
 </html>

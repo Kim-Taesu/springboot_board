@@ -7,16 +7,18 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
 @Controller
 @RequestMapping(value = "/account")
-@SessionAttributes("account")
 @Slf4j
 public class AccountController {
+
+    private final String ACCOUNT = "account";
 
     private final AccountService service;
 
@@ -35,13 +37,13 @@ public class AccountController {
     }
 
     @PostMapping("/login")
-    public String login(Model model,
-                        @RequestParam String id,
+    public String login(@RequestParam String id,
                         @RequestParam String password,
-                        RedirectAttributes attributes) {
+                        RedirectAttributes attributes,
+                        HttpSession session) {
         Object result = service.login(id, password);
         if (result.getClass().equals(Account.class)) {
-            model.addAttribute("account", result);
+            session.setAttribute(ACCOUNT, result);
             return "redirect:/";
         } else {
             attributes.addFlashAttribute("message", result);
@@ -51,9 +53,10 @@ public class AccountController {
 
     @PostMapping("/signUp")
     public String signUp(Model model,
-                         @ModelAttribute("sigUpAccount") @Valid Account account,
+                         @Valid @ModelAttribute Account account,
                          BindingResult bindingResult,
-                         RedirectAttributes attributes) {
+                         RedirectAttributes attributes,
+                         HttpSession session) {
         if (bindingResult.hasErrors()) {
             bindingResult.getFieldErrors().forEach(c -> {
                 attributes.addFlashAttribute("message", c.getField() + " : " + c.getDefaultMessage());
@@ -62,18 +65,19 @@ public class AccountController {
         }
         String result = service.signUp(account);
         if (result.equals("success")) {
+            log.info("signUp success");
             model.addAttribute("message", result);
             return "login";
         } else {
-            attributes.addFlashAttribute("account", account);
+            log.info("signUp fail");
             attributes.addFlashAttribute("message", result);
             return "redirect:/account/signUp";
         }
     }
 
     @GetMapping("/logout")
-    public String logout(SessionStatus status) {
-        status.setComplete();
+    public String logout(HttpServletRequest request) {
+        request.getSession().removeAttribute(ACCOUNT);
         return "redirect:/";
     }
 }

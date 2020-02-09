@@ -92,4 +92,18 @@ public class BoardControllerTest {
 //                .andExpect(status().is3xxRedirection())
 //                .andExpect(flash().attribute("message", board.toString()));
     }
+
+    @Test
+    public void boardList() throws Exception{
+        //given
+
+        // when
+        ResultActions actions = mockMvc.perform(get("/list"));
+
+        // then
+        actions
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(view().name("list"));
+    }
 }

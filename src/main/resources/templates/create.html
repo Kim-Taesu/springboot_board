@@ -3,20 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <title>Create Page</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
 </head>
 <body>
-<h1>Create Page</h1>
-<div th:if="${message}">
-    <h4 th:text="'message : ' + ${message}"></h4>
+<div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom shadow-sm">
+    <a class="my-0 mr-md-auto text-dark" href="/">Home</a>
+
+    <nav class="my-2 my-md-0 mr-md-3" th:if="${session['account']}">
+        <span class="p-2 text-dark" th:text="${session['account'].getId()}+'님 환영합니다.'">Id</span>
+        <span class="p-2 text-dark" th:text="'방문시각 : '+${session['visitTime']}">Visit</span>
+        <span class="p-2 text-dark" th:text="'사용시간 : '+${session['useTime']}">Use</span>
+    </nav>
+
+    <div th:if="${session['account']}">
+        <a role="button" class="btn btn-outline-danger" href="/account/logout">Logout</a>
+    </div>
+    <div th:if="!${session['account']}">
+        <a role="button" class="btn btn-outline-primary" href="/account/login">Login</a>
+        <a role="button" class="btn btn-outline-success" href="/account/signUp">Sign up</a>
+    </div>
 </div>
-<form action="/create" method="post">
-    <p>
-        title: <input name="title" required type="text">
-    </p>
-    <p>
-        content: <input name="content" type="text">
-    </p>
-    <input type="submit">
-</form>
+
+<div class="card border-danger mb-3" th:if="${message}">
+    <div class="card-body text-danger">
+        <h5 class="card-title">Message</h5>
+        <p class="card-text" th:text="${message}"></p>
+    </div>
+</div>
+<div class="container">
+    <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+        <h1 class="display-4">Create Page</h1>
+    </div>
+
+    <form th:action="@{/create}" th:method="post">
+        <div class="form-group">
+            <label for="title">Title</label>
+            <input type="text" name="title" class="form-control" id="title" placeholder="Enter title">
+        </div>
+        <div class="form-group">
+            <label for="content">Content</label>
+            <textarea class="form-control" name="content" id="content" rows="5"></textarea>
+        </div>
+        <div class="form-group">
+            <label for="fileInput">Example file input</label>
+            <input type="file" class="form-control-file" id="fileInput" name="fileInput">
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+        <button type="reset" class="btn btn-danger">Reset</button>
+    </form>
+</div>
 </body>
 </html>

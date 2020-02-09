@@ -11,24 +11,19 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
 @Slf4j
 @Controller
-@SessionAttributes("account")
 public class BoardController {
 
+    private final String ACCOUNT = "account";
     private final BoardService service;
 
     public BoardController(BoardService service) {
         this.service = service;
     }
-
-    @ModelAttribute
-    public Account setUpAccount() {
-        return new Account();
-    }
-
 
     @GetMapping("/create")
     public String createPage() {
@@ -37,13 +32,11 @@ public class BoardController {
 
     @GetMapping("/list")
     public String boardList(Model model,
-                            RedirectAttributes attributes,
-                            @Valid @ModelAttribute Account account,
-                            BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            attributes.addFlashAttribute("message", "login을 하세요");
+                            HttpSession session) {
+        if (session.getAttribute(ACCOUNT) == null) {
             return "redirect:/account/login";
         } else {
+            System.out.println("request /list");
             model.addAttribute("boards", service.viewAll());
             return "list";
         }
@@ -53,9 +46,8 @@ public class BoardController {
     public String detailPage(Model model,
                              @PathVariable String boardId,
                              RedirectAttributes attributes,
-                             @Valid @ModelAttribute Account account,
-                             BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
+                             @SessionAttribute Account account) {
+        if (account == null) {
             attributes.addFlashAttribute("message", "login을 하세요");
             return "redirect:/account/login";
         } else {
@@ -74,7 +66,7 @@ public class BoardController {
     public String create(
             RedirectAttributes attributes,
             @Valid @ModelAttribute Board board,
-            @Valid @ModelAttribute Account account,
+            @SessionAttribute Account account,
             BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             bindingResult.getFieldErrors().forEach(c -> {

@@ -3,10 +3,10 @@ package me.kts.boardexample.domain;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import javax.validation.constraints.Email;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
@@ -16,7 +16,7 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 public class Account {
     @Id
-    @NonNull
+    @NotNull
     String id;
 
     @NotNull
@@ -27,4 +27,7 @@ public class Account {
 
     @NotNull @Min(0)
     Integer age;
+
+    @NotNull @Email
+    String eMail;
 }
