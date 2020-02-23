@@ -50,4 +50,8 @@ public class Board {
         return "생성 완료 (" +
                 "title: " + title + ')';
     }
+
+    public void makeId(String userId, String title) {
+        this.setBoardId(userId + title);
+    }
 }

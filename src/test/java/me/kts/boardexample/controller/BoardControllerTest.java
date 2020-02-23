@@ -6,6 +6,7 @@ import me.kts.boardexample.domain.Board;
 import me.kts.boardexample.domain.BoardDto;
 import me.kts.boardexample.repository.BoardRepository;
 import me.kts.boardexample.service.BoardService;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -25,50 +26,16 @@ public class BoardControllerTest extends BaseControllerTest {
     @Autowired
     BoardRepository repository;
 
+    @Before
+    public void setup(){
+        repository.deleteAll();
+    }
 
     @Test
     public void create_fail_by_invalid_board() throws Exception {
         // given
-        Board board = Board.builder()
-                .boardId("kts")
-                .build();
-
-        // when
-        ResultActions actions = mockMvc.perform(post("/create")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(board))
-                .session(generateSession()))
-                .andDo(print());
-
-        // then
-        actions
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/create"));
-    }
-
-    @Test
-    public void create_fail_by_session_not_exist() throws Exception {
-        // given
-        Board board = generateSample();
-
-        // when
-        ResultActions actions = mockMvc.perform(post("/create")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(board)))
-                .andDo(print());
-
-        // then
-        actions
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/account/login"));
-    }
-
-    @Test
-    public void create_success() throws Exception {
-        // given
         BoardDto boardDto = BoardDto.builder()
-                .title("test_title")
-                .content("test_content")
+                .title("title")
                 .build();
 
         // when
@@ -84,6 +51,48 @@ public class BoardControllerTest extends BaseControllerTest {
                 .andExpect(redirectedUrl("/list"));
     }
 
+    @Test
+    public void create_fail_by_session_not_exist() throws Exception {
+        // given
+        BoardDto boardDto = generateBoardDto("title", "content");
+
+        // when
+        ResultActions actions = mockMvc.perform(post("/create")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(boardDto)))
+                .andDo(print());
+
+        // then
+        actions
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/account/login"));
+    }
+
+    @Test
+    public void create_success() throws Exception {
+        // given
+        BoardDto boardDto = generateBoardDto("title", "content");
+
+        // when
+        ResultActions actions = mockMvc.perform(post("/create")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(boardDto))
+                .session(generateSession()))
+                .andDo(print());
+
+        // then
+        actions
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/list"));
+    }
+
+    private BoardDto generateBoardDto(String title, String content) {
+        return BoardDto.builder()
+                .title(title)
+                .content(content)
+                .build();
+    }
+
 
     private Board generateSample() {
         return Board.builder()
@@ -94,31 +103,101 @@ public class BoardControllerTest extends BaseControllerTest {
 
     private MockHttpSession generateSession() {
         MockHttpSession mockHttpSession = new MockHttpSession();
-        mockHttpSession.setAttribute("id", "test_session");
+        mockHttpSession.setAttribute("id", "kts");
         return mockHttpSession;
     }
 
     @Test
-    public void update() throws Exception {
-//        // given
-//        Board board = new Board();
-//        board.setTitle("title");
-//        board.setId("id");
-//        board.setContent("content");
-//        board.setCreatedBy("kts");
-//        given(service.update("id", "kts", "content")).willReturn(board.toString());
-//
-//        // when
-//        ResultActions actions = mockMvc.perform(put("/update/id")
-//                .param("createdBy", "kts")
-//                .param("content", "content11"))
-//                .andDo(print());
-//
-//        // then
-//        actions
-//                .andExpect(status().is3xxRedirection())
-//                .andExpect(flash().attribute("message", board.toString()));
+    public void update_success() throws Exception {
+        MockHttpSession mockHttpSession = generateSession();
+        String user = (String) mockHttpSession.getAttribute("id");
+
+        // given
+        Board board = Board.builder()
+                .title("title")
+                .content("content")
+                .createdBy(user)
+                .build();
+        board.makeId(board.getCreatedBy(), board.getTitle());
+
+        repository.save(board);
+
+        board.setTitle("title update!");
+        board.setContent("content update!");
+
+        // when
+        ResultActions actions = mockMvc.perform(post("/update/" + board.getBoardId())
+                .session(mockHttpSession)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(board)))
+                .andDo(print());
+
+        // then
+        actions
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/detail/" + board.getBoardId()))
+                .andExpect(flash().attribute("message", "update success"));
     }
+
+    @Test
+    public void update_fail_by_owner_not_matched() throws Exception {
+        MockHttpSession mockHttpSession = generateSession();
+        String user = (String) mockHttpSession.getAttribute("id");
+
+        // given
+        Board board = Board.builder()
+                .title("title")
+                .content("content")
+                .createdBy(user + "dump")
+                .build();
+        board.makeId(board.getCreatedBy(), board.getTitle());
+
+        repository.save(board);
+
+        board.setTitle("title update!");
+        board.setContent("content update!");
+
+        // when
+        ResultActions actions = mockMvc.perform(post("/update/" + board.getBoardId())
+                .session(mockHttpSession)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(board)))
+                .andDo(print());
+
+        // then
+        actions
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/detail/" + board.getBoardId()))
+                .andExpect(flash().attribute("message", "update fail"));
+    }
+
+    @Test
+    public void update_fail_by_session_not_exist() throws Exception {
+        // given
+        Board board = Board.builder()
+                .title("title")
+                .content("content")
+                .createdBy("kts")
+                .build();
+        board.makeId(board.getCreatedBy(), board.getTitle());
+
+        repository.save(board);
+
+        board.setTitle("title update!");
+        board.setContent("content update!");
+
+        // when
+        ResultActions actions = mockMvc.perform(post("/update/" + board.getBoardId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(board)))
+                .andDo(print());
+
+        // then
+        actions
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/account/login"));
+    }
+
 
     @Test
     public void boardList_success() throws Exception {

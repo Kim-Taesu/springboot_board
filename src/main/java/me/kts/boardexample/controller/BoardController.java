@@ -7,6 +7,7 @@ import me.kts.boardexample.service.BoardService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -74,7 +75,7 @@ public class BoardController {
     @PostMapping("/update/{boardId}")
     public String update(RedirectAttributes attributes,
                          HttpSession session,
-                         @Valid @ModelAttribute Board board,
+                         @Valid @RequestBody Board board,
                          BindingResult bindingResult) {
         String id = (String) session.getAttribute("id");
         if (bindingResult.hasErrors()) {
@@ -149,6 +150,11 @@ public class BoardController {
         }
         attributes.addFlashAttribute("message", message);
         return "redirect:/detail/" + boardId;
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public String exceptionController() {
+        return "redirect:/list";
     }
 
 }

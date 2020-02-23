@@ -36,7 +36,6 @@ public class BoardService {
         } else {
             Date date = new Date();
             Board board = Board.builder()
-                    .boardId(userId + boardDto.getTitle())
                     .title(boardDto.getTitle())
                     .content(boardDto.getContent())
                     .createdBy(userId)
@@ -44,6 +43,7 @@ public class BoardService {
                     .createDate(simpleDateFormat.format(date))
                     .lastModifiedDate(simpleDateFormat.format(date))
                     .build();
+            board.makeId(board.getCreatedBy(), board.getTitle());
             repository.save(board);
             return true;
         }
@@ -76,12 +76,9 @@ public class BoardService {
                 board.setLastModifiedDate(simpleDateFormat.format(date));
                 repository.save(board);
                 return true;
-            } else {
-                return false;
             }
-        } else {
-            return false;
         }
+        return false;
     }
 
     public Board detailBoard(String id) {
