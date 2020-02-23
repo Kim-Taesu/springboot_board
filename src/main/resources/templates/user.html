@@ -2,7 +2,7 @@
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Login Page</title>
+    <title>SignUp Page</title>
     <link crossorigin="anonymous" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
           integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" rel="stylesheet">
 </head>
@@ -16,7 +16,7 @@
     <!--        <a class="p-2 text-dark" href="#">Support</a>-->
     <!--        <a class="p-2 text-dark" href="#">Pricing</a>-->
     <!--    </nav>-->
-    <a class="btn btn-outline-primary" href="/account/signUp">Sign up</a>
+    <a class="btn btn-outline-primary" href="/account/login">Login</a>
 </div>
 
 <div class="card border-danger mb-3" th:if="${message}">
@@ -28,10 +28,10 @@
 
 <div class="container">
     <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
-        <h1 class="display-4">Login</h1>
+        <h1 class="display-4">Sign Up</h1>
     </div>
 
-    <form th:action="@{/account/login}" th:method="post">
+    <form th:action="@{/account/update}" th:method="post">
         <div class="form-group">
             <label for="id">Id</label>
             <input class="form-control" id="id" name="id" placeholder="Enter Id" required type="text">
@@ -40,9 +40,25 @@
             <label for="password">Password</label>
             <input class="form-control" id="password" name="password" placeholder="Password" required type="password">
         </div>
-        <button class="btn btn-primary" type="submit">Submit</button>
+        <div class="form-group">
+            <label for="name">Name</label>
+            <input class="form-control" id="name" name="name" placeholder="Enter Name" required type="text">
+        </div>
+        <div class="form-group">
+            <label for="age">Age</label>
+            <input class="form-control" id="age" name="age" placeholder="Enter age" required type="number">
+        </div>
+        <div class="form-group">
+            <label for="email">Email address</label>
+            <input aria-describedby="emailHelp" class="form-control" id="email" name="eMail" placeholder="Enter email"
+                   required type="email">
+            <small class="form-text text-muted" id="emailHelp">We'll never share your email with anyone else.</small>
+        </div>
+        <button class="btn btn-primary" data-target="#exampleModalCenter" data-toggle="modal" type="submit">Submit
+        </button>
         <button class="btn btn-danger" type="reset">Reset</button>
     </form>
+
 </div>
 </body>
 </html>

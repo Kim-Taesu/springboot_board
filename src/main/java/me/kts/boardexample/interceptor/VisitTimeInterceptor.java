@@ -13,30 +13,42 @@ import java.time.temporal.ChronoUnit;
 @Slf4j
 public class VisitTimeInterceptor implements HandlerInterceptor {
 
+    private final String ACCOUNT = "id";
+    private final String VISIT_TIME = "visitTime";
+    private final String USE_TIME = "useTime";
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         log.info("visitTime interceptor preHandler");
+        // session 정보 가져오기
         HttpSession session = request.getSession();
-        String ACCOUNT = "account";
-        String VISIT_TIME = "visitTime";
-        String USE_TIME = "useTime";
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy년 M월 d일 a h시 m분 s초");
-        // account session 존재하면
+        // 로그인한 상태라면
         if (session.getAttribute(ACCOUNT) != null) {
-            log.info("account exists");
-            // visit time 존재 x
+            log.info("\taccount exists");
+            // date format
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy년 M월 d일 a h시 m분 s초");
+            // 방문 시간이 존재하면
             if (session.getAttribute(VISIT_TIME) == null) {
+                log.info("\tvisit time not exists");
+                // 현재 방문시간 계산
                 LocalDateTime now = LocalDateTime.now();
+                // 방문 시간을 시간 포맷에 맞게 변경 후 저장
                 session.setAttribute(VISIT_TIME, now.format(dateTimeFormatter));
-                session.setAttribute(USE_TIME, ChronoUnit.MINUTES.between(now, LocalDateTime.now())+"분");
+                // 이용 시간 저장
+                session.setAttribute(USE_TIME, ChronoUnit.MINUTES.between(now, LocalDateTime.now()) + "분");
             } else {
+                log.info("\tvisit time exists");
+                // 방문했던 시간 LocalDateTime 형식으로 변환
                 LocalDateTime visitTime = LocalDateTime.parse((CharSequence) session.getAttribute(VISIT_TIME), dateTimeFormatter);
-                session.setAttribute(USE_TIME, ChronoUnit.MINUTES.between(visitTime, LocalDateTime.now())+"분");
+                log.info("\tupdate useTime");
+                // 이용 시간 저장
+                session.setAttribute(USE_TIME, ChronoUnit.MINUTES.between(visitTime, LocalDateTime.now()) + "분");
             }
         }
-        // account session 존재 x
+        // 로그인한 상태가 아니라면
         else {
-            log.info("account not exists");
+            log.info("\taccount not exists");
+            // 로그인하지 않았는데 방문시간이 존재하면 삭제
             if (session.getAttribute(VISIT_TIME) != null) {
                 session.removeAttribute(VISIT_TIME);
             }

@@ -1,7 +1,7 @@
 package me.kts.boardexample.service;
 
-import lombok.NonNull;
 import me.kts.boardexample.domain.Board;
+import me.kts.boardexample.domain.BoardDto;
 import me.kts.boardexample.domain.Comment;
 import me.kts.boardexample.repository.BoardCustomRepository;
 import me.kts.boardexample.repository.BoardRepository;
@@ -29,39 +29,42 @@ public class BoardService {
         return repository.findAll();
     }
 
-    public String create(String userId, Board board) {
-        Optional<Board> byId = repository.findById(userId + board.getTitle());
+    public boolean create(String userId, BoardDto boardDto) {
+        Optional<Board> byId = repository.findById(userId + boardDto.getTitle());
         if (byId.isPresent()) {
-            return "동일한 title의 게시글이 존재합니다.";
+            return false;
         } else {
             Date date = new Date();
-            board.setBoardId(userId + board.getTitle());
-            board.setCreatedBy(userId);
-            board.setLastModifiedBy(userId);
-
-            board.setCreateDate(simpleDateFormat.format(date));
-            board.setLastModifiedDate(simpleDateFormat.format(date));
-            Board save = repository.save(board);
-            return save.toString();
+            Board board = Board.builder()
+                    .boardId(userId + boardDto.getTitle())
+                    .title(boardDto.getTitle())
+                    .content(boardDto.getContent())
+                    .createdBy(userId)
+                    .lastModifiedBy(userId)
+                    .createDate(simpleDateFormat.format(date))
+                    .lastModifiedDate(simpleDateFormat.format(date))
+                    .build();
+            repository.save(board);
+            return true;
         }
     }
 
-    public String delete(@NonNull String userId, String id) {
+    public boolean delete(String userId, String id) {
         Optional<Board> byId = repository.findById(id);
         if (byId.isPresent()) {
             Board board = byId.get();
             if (board.getCreatedBy().equals(userId)) {
                 repository.deleteById(id);
-                return "delete success";
+                return true;
             } else {
-                return "삭제권한 없음";
+                return false;
             }
         } else {
-            return "delete err";
+            return false;
         }
     }
 
-    public String update(String userId, Board newBoard) {
+    public boolean update(String userId, Board newBoard) {
         Optional<Board> byId = repository.findById(newBoard.getBoardId());
         if (byId.isPresent()) {
             Board board = byId.get();
@@ -72,47 +75,45 @@ public class BoardService {
                 Date date = new Date();
                 board.setLastModifiedDate(simpleDateFormat.format(date));
                 repository.save(board);
-                return "update success";
+                return true;
             } else {
-                return "update 권한이 없습니다.";
+                return false;
             }
         } else {
-            return "update 오류";
+            return false;
         }
     }
 
-    public Object detailBoard(String id) {
+    public Board detailBoard(String id) {
         Optional<Board> byId = repository.findById(id);
-        if (byId.isPresent()) {
-            return byId.get();
-        } else {
-            return "detail err";
-        }
+        return byId.orElse(null);
     }
 
-    public String createComment(String userId, String id, String content) {
+    public boolean createComment(String userId, String id, String content) {
         Optional<Board> byId = repository.findById(id);
         if (byId.isPresent()) {
             Board board = byId.get();
             Date date = new Date();
 
-            Comment comment = new Comment();
-            comment.setCommentId(userId + content);
-            comment.setUserId(userId);
-            comment.setContent(content);
-            comment.setCreatedBy(userId);
-            comment.setLastModifiedBy(userId);
-            comment.setCreateDate(simpleDateFormat.format(date));
-            comment.setLastModifiedDate(simpleDateFormat.format(date));
-            board.getComments().add(comment);
+            Comment comment = Comment.builder()
+                    .commentId(userId + content)
+                    .userId(userId)
+                    .content(content)
+                    .createdBy(userId)
+                    .lastModifiedBy(userId)
+                    .createDate(simpleDateFormat.format(date))
+                    .lastModifiedDate(simpleDateFormat.format(date))
+                    .build();
+
+            board.addComment(comment);
             repository.save(board);
-            return "success";
+            return true;
         } else {
-            return "create comment err";
+            return false;
         }
     }
 
-    public String updateComment(String userId, String commentId, String boardId, String newContent) {
+    public boolean updateComment(String userId, String commentId, String boardId, String newContent) {
         Optional<Board> byId = repository.findById(boardId);
         if (byId.isPresent()) {
             Board board = byId.get();
@@ -125,19 +126,16 @@ public class BoardService {
                         comment.setLastModifiedBy(userId);
                         comment.setLastModifiedDate(simpleDateFormat.format(new Date()));
                         repository.save(board);
-                        return "update comment";
-                    } else {
-                        return "update comment 권한 없음";
+                        return true;
                     }
                 }
             }
         }
-        return "database err";
+        return false;
     }
 
-    public String deleteComment(String userId, String boardId, String commentId) {
+    public boolean deleteComment(String userId, String boardId, String commentId) {
         Optional<Board> byId = repository.findById(boardId);
-        String result = "";
         if (byId.isPresent()) {
             Board board = byId.get();
             List<Comment> comments = board.getComments();
@@ -145,16 +143,12 @@ public class BoardService {
                 if (comment.getCommentId().equals(commentId)) {
                     if (comment.getUserId().equals(userId) || board.getCreatedBy().equals(userId)) {
                         customRepository.deleteComment(userId, boardId, commentId, comment.getCreateDate());
-                        result = "delete comment success";
-                    } else {
-                        result = "delete comment 권한 없음";
+                        return true;
                     }
-                    break;
                 }
             }
-        } else {
-            result = "delete comment err";
         }
-        return result;
+        return false;
     }
+
 }

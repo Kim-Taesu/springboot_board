@@ -1,9 +1,8 @@
 package me.kts.boardexample.controller;
 
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import me.kts.boardexample.domain.Account;
 import me.kts.boardexample.domain.Board;
+import me.kts.boardexample.domain.BoardDto;
 import me.kts.boardexample.service.BoardService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,7 +17,7 @@ import javax.validation.Valid;
 @Controller
 public class BoardController {
 
-    private final String ACCOUNT = "account";
+    private final String ACCOUNT = "id";
     private final BoardService service;
 
     public BoardController(BoardService service) {
@@ -31,80 +30,76 @@ public class BoardController {
     }
 
     @GetMapping("/list")
-    public String boardList(Model model,
-                            HttpSession session) {
-        if (session.getAttribute(ACCOUNT) == null) {
-            return "redirect:/account/login";
-        } else {
-            System.out.println("request /list");
-            model.addAttribute("boards", service.viewAll());
-            return "list";
-        }
+    public String boardList(Model model) {
+        model.addAttribute("boards", service.viewAll());
+        return "list";
     }
 
     @GetMapping("/detail/{boardId}")
     public String detailPage(Model model,
                              @PathVariable String boardId,
-                             RedirectAttributes attributes,
-                             @SessionAttribute Account account) {
-        if (account == null) {
-            attributes.addFlashAttribute("message", "login을 하세요");
-            return "redirect:/account/login";
+                             RedirectAttributes attributes) {
+        Board board = service.detailBoard(boardId);
+        if (board == null) {
+            attributes.addFlashAttribute("message", "detail board error");
+            return "redirect:/list";
         } else {
-            Object result = service.detailBoard(boardId);
-            if (result.getClass().equals(Board.class)) {
-                model.addAttribute("board", result);
-                return "detail";
-            } else {
-                attributes.addFlashAttribute("message", result);
-                return "redirect:/list";
-            }
+            model.addAttribute("board", board);
+            return "detail";
         }
     }
 
     @PostMapping("/create")
     public String create(
             RedirectAttributes attributes,
-            @Valid @ModelAttribute Board board,
-            @SessionAttribute Account account,
+            @Valid BoardDto boardDto,
+            HttpSession session,
             BindingResult bindingResult) {
+
         if (bindingResult.hasErrors()) {
             bindingResult.getFieldErrors().forEach(c -> {
                 attributes.addFlashAttribute("message", c.getField() + " : " + c.getDefaultMessage());
             });
             return "redirect:/create";
-        } else {
-            attributes.addFlashAttribute("message", service.create(account.getId(), board));
+        }
+
+        if (service.create(session.getAttribute("id").toString(), boardDto)) {
+            attributes.addFlashAttribute("message", "게시글 생성 성공");
             return "redirect:/list";
+        } else {
+            return "redirect:/create";
         }
     }
 
     @PostMapping("/update/{boardId}")
     public String update(RedirectAttributes attributes,
-                         @Valid @ModelAttribute Account account,
+                         HttpSession session,
                          @Valid @ModelAttribute Board board,
                          BindingResult bindingResult) {
+        String id = (String) session.getAttribute("id");
         if (bindingResult.hasErrors()) {
             bindingResult.getFieldErrors().forEach(c -> {
                 attributes.addFlashAttribute("message", c.getField() + " : " + c.getDefaultMessage());
             });
+        } else if (service.update(id, board)) {
+            attributes.addFlashAttribute("message", "update success");
         } else {
-            String result = service.update(account.getId(), board);
-            attributes.addFlashAttribute("message", result);
+            attributes.addFlashAttribute("message", "update fail");
         }
         return "redirect:/detail/" + board.getBoardId();
+
     }
 
     @GetMapping("/delete/{boardId}")
     public String delete(RedirectAttributes attributes,
                          @PathVariable String boardId,
-                         @Valid @ModelAttribute Account account) {
-        @NonNull String userId = account.getId();
-        String result = service.delete(userId, boardId);
-        attributes.addFlashAttribute("message", result);
-        if (result.equals("delete success")) {
+                         HttpSession session) {
+        String userId = (String) session.getAttribute("id");
+        if (service.delete(userId, boardId)) {
+            attributes.addFlashAttribute("message", "delete success");
             return "redirect:/list";
         } else {
+            attributes.addFlashAttribute("message", "delete fail");
             return "redirect:/detail/" + boardId;
         }
     }
@@ -113,10 +108,13 @@ public class BoardController {
     public String createComment(@PathVariable String boardId,
                                 @RequestParam String content,
                                 RedirectAttributes attributes,
-                                @Valid @ModelAttribute Account account) {
-        String userId = account.getId();
-        String result = service.createComment(userId, boardId, content);
-        attributes.addFlashAttribute("message", result);
+                                HttpSession session) {
+        String userId = (String) session.getAttribute("id");
+        if (service.createComment(userId, boardId, content)) {
+            attributes.addFlashAttribute("message", "create comment success");
+        } else {
+            attributes.addFlashAttribute("message", "create comment fail");
+        }
         return "redirect:/detail/" + boardId;
     }
 
@@ -125,9 +123,15 @@ public class BoardController {
                                 @PathVariable String boardId,
                                 @PathVariable String commentId,
                                 @RequestParam String content,
-                                @Valid @ModelAttribute Account account) {
-        String result = service.updateComment(account.getId(), commentId, boardId, content);
-        attributes.addFlashAttribute("message", result);
+                                HttpSession session) {
+        String id = (String) session.getAttribute("id");
+        String message;
+        if (service.updateComment(id, commentId, boardId, content)) {
+            message = "update comment success";
+        } else {
+            message = "update comment fail";
+        }
+        attributes.addFlashAttribute("message", message);
         return "redirect:/detail/" + boardId;
     }
 
@@ -135,9 +139,15 @@ public class BoardController {
     public String deleteComment(RedirectAttributes attributes,
                                 @PathVariable String boardId,
                                 @PathVariable String commentId,
-                                @Valid @ModelAttribute Account account) {
-        String result = service.deleteComment(account.getId(), boardId, commentId);
-        attributes.addFlashAttribute("message", result);
+                                HttpSession session) {
+        String id = (String) session.getAttribute("id");
+        String message;
+        if (service.deleteComment(id, boardId, commentId)) {
+            message = "delete comment success";
+        } else {
+            message = "delete comment fail";
+        }
+        attributes.addFlashAttribute("message", message);
         return "redirect:/detail/" + boardId;
     }
 

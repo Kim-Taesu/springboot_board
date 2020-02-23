@@ -1,6 +1,7 @@
 package me.kts.boardexample.domain;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
@@ -14,6 +15,7 @@ import javax.validation.constraints.NotNull;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Account {
     @Id
     @NotNull
@@ -28,6 +30,6 @@ public class Account {
     @NotNull @Min(0)
     Integer age;
 
-    @NotNull @Email
+    @Email
     String eMail;
 }

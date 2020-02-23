@@ -1,36 +1,46 @@
 package me.kts.boardexample.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import me.kts.boardexample.common.BaseControllerTest;
 import me.kts.boardexample.domain.Account;
+import me.kts.boardexample.repository.AccountRepository;
 import me.kts.boardexample.service.AccountService;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.ResultActions;
 
-import static org.mockito.BDDMockito.given;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@RunWith(SpringRunner.class)
-@WebMvcTest(AccountController.class)
-public class AccountControllerTest {
+public class AccountControllerTest extends BaseControllerTest {
 
     @Autowired
-    MockMvc mockMvc;
-
-    @MockBean
     AccountService service;
 
     @Autowired
-    ObjectMapper objectMapper;
+    AccountRepository repository;
+
+    @Test
+    public void logout() throws Exception {
+        Account account = buildAccount("test", "test", "test", 26, "akvks456@gmail.com");
+        repository.save(account);
+
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("id", account.getId());
+        assertThat(session.getAttribute("id")).isNotNull();
+
+        ResultActions actions = mockMvc
+                .perform(get("/account/logout")
+                        .session(session))
+                .andDo(print());
+
+        actions
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/"));
+    }
 
     @Test
     public void loginPage() throws Exception {
@@ -57,82 +67,138 @@ public class AccountControllerTest {
     }
 
     @Test
-    public void login() throws Exception {
+    public void login_fail_by_id() throws Exception {
 
         // given
-        Account account = new Account();
-        account.setId("id");
-        account.setPassword("password");
-        given(service.login("id", "password")).willReturn(account);
+        String id = "id";
+        String password = "password";
+
+        Account account = buildAccount(id, password);
+        repository.save(account);
 
         // when
         ResultActions actions = mockMvc.perform(post("/account/login")
-                .param("id", "id")
-                .param("password", "password"))
+                .param("id", id + "dump")
+                .param("password", password))
                 .andDo(print());
 
         // then
         actions
                 .andExpect(status().is3xxRedirection())
-                .andExpect(view().name("redirect:/list"));
+                .andExpect(view().name("redirect:/account/login"));
+    }
 
-        //---------------------------------------------------------------------------//
+    @Test
+    public void login_fail_by_password() throws Exception {
 
         // given
-        given(service.login("id2", "password")).willReturn("id err");
+        String id = "id";
+        String password = "password";
+
+        Account account = buildAccount(id, password);
+        repository.save(account);
 
         // when
-        ResultActions actions2 = mockMvc.perform(post("/account/login")
-                .param("id", "id2")
-                .param("password", "password"))
+        ResultActions actions = mockMvc.perform(post("/account/login")
+                .param("id", id)
+                .param("password", password + "dump"))
                 .andDo(print());
 
         // then
-        actions2
+        actions
                 .andExpect(status().is3xxRedirection())
                 .andExpect(view().name("redirect:/account/login"));
     }
 
     @Test
-    public void signUp() throws Exception {
+    public void login_success() throws Exception {
+
         // given
-        Account account = new Account();
-        account.setId("kts");
-        account.setPassword("pw");
-        account.setName("kts");
-        given(service.signUp(account))
-                .willReturn("success");
+        String id = "id";
+        String password = "password";
+
+        Account account = buildAccount(id, password);
+        repository.save(account);
+
+        // when
+        ResultActions actions = mockMvc.perform(post("/account/login")
+                .param("id", id)
+                .param("password", password))
+                .andDo(print());
+
+        // then
+        actions
+                .andExpect(status().is3xxRedirection())
+                .andExpect(view().name("redirect:/"));
+    }
+
+    private Account buildAccount(String id, String password) {
+        return Account.builder()
+                .id(id)
+                .password(password)
+                .build();
+    }
+
+    private Account buildAccount(String id, String password, String name, Integer age, String eMail) {
+        return Account.builder()
+                .id(id)
+                .password(password)
+                .age(age)
+                .eMail(eMail)
+                .name(name)
+                .build();
+    }
+
+    @Test
+    public void signUp_fail_invalid_data() throws Exception {
+        Account account = buildAccount("kts_test", "kts_test");
+        // when
+        ResultActions actions = mockMvc.perform(post("/account/signUp")
+                .param("id", account.getId())
+                .param("password", account.getPassword()))
+                .andDo(print());
+
+        // then
+        actions
+                .andExpect(status().is3xxRedirection())
+                .andExpect(view().name("redirect:/account/signUp"));
+    }
+
+    @Test
+    public void signUp_fail_id_duplicate() throws Exception {
+        Account account = buildAccount("kts_test", "kts_test", "kts", 26, "akvks456@gmail.com");
+        repository.save(account);
 
         // when
         ResultActions actions = mockMvc.perform(post("/account/signUp")
                 .param("id", account.getId())
                 .param("password", account.getPassword())
-                .param("name", account.getName()))
+                .param("name", account.getName())
+                .param("age", account.getAge().toString()))
+                .andDo(print());
+
+        // then
+        actions
+                .andExpect(status().is3xxRedirection())
+                .andExpect(view().name("redirect:/account/signUp"));
+    }
+
+    @Test
+    public void signUp_success() throws Exception {
+        Account account = buildAccount("signup_test3", "signup_test2", "kts", 26, "akvks456@gmail.com");
+
+        // when
+        ResultActions actions = mockMvc.perform(post("/account/signUp")
+                .param("id", account.getId())
+                .param("password", account.getPassword())
+                .param("name", account.getName())
+                .param("age", account.getAge().toString())
+                .param("eMail", account.getEMail()))
                 .andDo(print());
 
         // then
         actions
                 .andExpect(status().isOk())
                 .andExpect(view().name("login"));
-
-        // given
-        Account account1 = new Account();
-        account1.setId("kts222");
-        account1.setPassword("pw");
-        account1.setName("kts");
-        given(service.signUp(account))
-                .willReturn("fail");
-
-        // when
-        ResultActions actions1 = mockMvc.perform(post("/account/signUp")
-                .param("id", account1.getId())
-                .param("password", account1.getPassword())
-                .param("name", account1.getName()))
-                .andDo(print());
-
-        // then
-        actions1
-                .andExpect(status().is3xxRedirection())
-                .andExpect(view().name("redirect:/account/signUp"));
     }
 }

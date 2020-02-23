@@ -18,7 +18,6 @@ import javax.validation.Valid;
 @Slf4j
 public class AccountController {
 
-    private final String ACCOUNT = "account";
 
     private final AccountService service;
 
@@ -41,12 +40,11 @@ public class AccountController {
                         @RequestParam String password,
                         RedirectAttributes attributes,
                         HttpSession session) {
-        Object result = service.login(id, password);
-        if (result.getClass().equals(Account.class)) {
-            session.setAttribute(ACCOUNT, result);
+        if (service.loginCheck(id, password)) {
+            session.setAttribute("id", id);
             return "redirect:/";
         } else {
-            attributes.addFlashAttribute("message", result);
+            attributes.addFlashAttribute("message", "id / pw 오류");
             return "redirect:/account/login";
         }
     }
@@ -55,29 +53,25 @@ public class AccountController {
     public String signUp(Model model,
                          @Valid @ModelAttribute Account account,
                          BindingResult bindingResult,
-                         RedirectAttributes attributes,
-                         HttpSession session) {
+                         RedirectAttributes attributes) {
         if (bindingResult.hasErrors()) {
             bindingResult.getFieldErrors().forEach(c -> {
                 attributes.addFlashAttribute("message", c.getField() + " : " + c.getDefaultMessage());
             });
             return "redirect:/account/signUp";
         }
-        String result = service.signUp(account);
-        if (result.equals("success")) {
-            log.info("signUp success");
-            model.addAttribute("message", result);
+        if (service.signupcheck(account)) {
+            model.addAttribute("message", "signUp success");
             return "login";
         } else {
-            log.info("signUp fail");
-            attributes.addFlashAttribute("message", result);
+            attributes.addFlashAttribute("message", "signUp fail");
             return "redirect:/account/signUp";
         }
     }
 
     @GetMapping("/logout")
     public String logout(HttpServletRequest request) {
-        request.getSession().removeAttribute(ACCOUNT);
+        service.logout(request.getSession());
         return "redirect:/";
     }
 }

@@ -4,38 +4,41 @@ import me.kts.boardexample.domain.Account;
 import me.kts.boardexample.repository.AccountRepository;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpSession;
 import java.util.Optional;
 
 @Service
 public class AccountService {
 
+    private final String ACCOUNT = "id";
     private final AccountRepository repository;
 
     public AccountService(AccountRepository repository) {
         this.repository = repository;
     }
 
-    public Object login(String id, String password) {
+    public boolean loginCheck(String id,
+                              String password) {
         Optional<Account> byId = repository.findById(id);
         if (byId.isPresent()) {
             Account account = byId.get();
-            if (account.getPassword().equals(password)) {
-                return account;
-            } else {
-                return "error : 비밀번호 오류";
-            }
+            return account.getPassword().equals(password);
         } else {
-            return "error : 일치하는 id 없음";
+            return false;
         }
     }
 
-    public String signUp(Account account) {
+    public boolean signupcheck(Account account) {
         Optional<Account> byId = repository.findById(account.getId());
         if (byId.isPresent()) {
-            return "error : 이미 id가 존재";
+            return false;
         } else {
             repository.save(account);
-            return "success";
+            return true;
         }
+    }
+
+    public void logout(HttpSession session) {
+        session.removeAttribute(ACCOUNT);
     }
 }

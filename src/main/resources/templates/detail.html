@@ -3,26 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <title>Create Page</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
-          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link crossorigin="anonymous" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" rel="stylesheet">
 
 </head>
 <body>
 <div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom shadow-sm">
     <a class="my-0 mr-md-auto text-dark" href="/">Home</a>
 
-    <nav class="my-2 my-md-0 mr-md-3" th:if="${session['account']}">
-        <span class="p-2 text-dark" th:text="${session['account'].getId()}+'님 환영합니다.'">Id</span>
+    <nav class="my-2 my-md-0 mr-md-3" th:if="${session['id']}">
+        <span class="p-2 text-dark" th:text="${session['id']}+'님 환영합니다.'">Id</span>
         <span class="p-2 text-dark" th:text="'방문시각 : '+${session['visitTime']}">Visit</span>
         <span class="p-2 text-dark" th:text="'사용시간 : '+${session['useTime']}">Use</span>
     </nav>
 
-    <div th:if="${session['account']}">
-        <a role="button" class="btn btn-outline-danger" href="/account/logout">Logout</a>
+    <div th:if="${session['id']}">
+        <a class="btn btn-outline-danger" href="/account/logout" role="button">Logout</a>
     </div>
-    <div th:if="!${session['account']}">
-        <a role="button" class="btn btn-outline-primary" href="/account/login">Login</a>
-        <a role="button" class="btn btn-outline-success" href="/account/signUp">Sign up</a>
+    <div th:if="!${session['id']}">
+        <a class="btn btn-outline-primary" href="/account/login" role="button">Login</a>
+        <a class="btn btn-outline-success" href="/account/signUp" role="button">Sign up</a>
     </div>
 </div>
 
@@ -39,52 +39,56 @@
     </div>
 
 
-    <form th:method="post" th:action="@{/update/{boardId}(boardId=${board.getBoardId()})}" th:object="${board}">
+    <form th:action="@{/update/{boardId}(boardId=${board.getBoardId()})}" th:method="post" th:object="${board}">
         <div class="form-group row">
-            <label for="title" class="col-sm-2 col-form-label">Title</label>
+            <label class="col-sm-2 col-form-label" for="title">Title</label>
             <div class="col-sm-10">
-                <input type="text" readonly class="form-control-plaintext" name="title" id="title"
-                       th:value="*{getTitle()}">
+                <input class="form-control-plaintext" id="title" name="title" readonly th:value="*{getTitle()}"
+                       type="text">
             </div>
         </div>
         <div class="form-group row">
-            <label for="content" class="col-sm-2 col-form-label">content</label>
+            <label class="col-sm-2 col-form-label" for="content">content</label>
             <div class="col-sm-10">
-                <input type="text" class="form-control" name="content" id="content" th:value="*{getContent()}">
-            </div>
-        </div>
-
-        <div class="form-group row">
-            <label for="createdBy" class="col-sm-2 col-form-label">Created By</label>
-            <div class="col-sm-10">
-                <input type="text" readonly class="form-control-plaintext" name="createdBy" id="createdBy"
-                       th:value="*{getCreatedBy()}">
+                <input class="form-control" id="content" name="content" th:value="*{getContent()}" type="text">
             </div>
         </div>
 
         <div class="form-group row">
-            <label for="createDate" class="col-sm-2 col-form-label">Create Date</label>
+            <label class="col-sm-2 col-form-label" for="createdBy">Created By</label>
             <div class="col-sm-10">
-                <input type="text" readonly class="form-control-plaintext" name="createDate" id="createDate"
-                       th:value="*{getCreateDate()}">
-            </div>
-        </div>
-        <div class="form-group row">
-            <label for="lastModifiedBy" class="col-sm-2 col-form-label">Update By</label>
-            <div class="col-sm-10">
-                <input type="text" readonly class="form-control-plaintext" name="lastModifiedBy" id="lastModifiedBy"
-                       th:value="*{getLastModifiedBy()}">
+                <input class="form-control-plaintext" id="createdBy" name="createdBy" readonly
+                       th:value="*{getCreatedBy()}"
+                       type="text">
             </div>
         </div>
 
         <div class="form-group row">
-            <label for="lastModifiedDate" class="col-sm-2 col-form-label">Update Date</label>
+            <label class="col-sm-2 col-form-label" for="createDate">Create Date</label>
             <div class="col-sm-10">
-                <input type="text" readonly class="form-control-plaintext" name="lastModifiedDate" id="lastModifiedDate"
-                       th:value="*{getLastModifiedDate()}">
+                <input class="form-control-plaintext" id="createDate" name="createDate" readonly
+                       th:value="*{getCreateDate()}"
+                       type="text">
             </div>
         </div>
-        <button type="submit" class="btn btn-primary">Update</button>
+        <div class="form-group row">
+            <label class="col-sm-2 col-form-label" for="lastModifiedBy">Update By</label>
+            <div class="col-sm-10">
+                <input class="form-control-plaintext" id="lastModifiedBy" name="lastModifiedBy" readonly
+                       th:value="*{getLastModifiedBy()}"
+                       type="text">
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label class="col-sm-2 col-form-label" for="lastModifiedDate">Update Date</label>
+            <div class="col-sm-10">
+                <input class="form-control-plaintext" id="lastModifiedDate" name="lastModifiedDate" readonly
+                       th:value="*{getLastModifiedDate()}"
+                       type="text">
+            </div>
+        </div>
+        <button class="btn btn-primary" type="submit">Update</button>
     </form>
     <hr/>
     <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
@@ -94,35 +98,40 @@
         <ul th:each="comment: ${board.getComments()}">
             <form th:action="@{/update/{boardId}/comment/{commentId}(commentId=${comment.getCommentId()},boardId=${board.getBoardId()})}"
                   th:method="post">
-                <p th:text="'사용자 : ' + ${comment.getUserId()}"></p>
-                <p>comment : <input name="content" th:value="${comment.getContent()}"></p>
-                <p th:text="'createdBy : ' + ${comment.getCreatedBy()}"></p>
-                <p th:text="'createDate : ' + ${comment.getCreateDate()}"></p>
-                <p th:text="'lastModifiedBy : ' + ${comment.getLastModifiedBy()}"></p>
-                <p th:text="'lastModifiedDate : ' + ${comment.getLastModifiedDate()}"></p>
-                <input th:value="수정" type="submit">
+                <div class="card">
+                    <div class="card-body">
+                        <p th:text="'사용자 : ' + ${comment.getUserId()}"></p>
+                        <p>comment : <input name="content" th:value="${comment.getContent()}"></p>
+                        <p th:text="'createdBy : ' + ${comment.getCreatedBy()}"></p>
+                        <p th:text="'createDate : ' + ${comment.getCreateDate()}"></p>
+                        <p th:text="'lastModifiedBy : ' + ${comment.getLastModifiedBy()}"></p>
+                        <p th:text="'lastModifiedDate : ' + ${comment.getLastModifiedDate()}"></p>
+                        <input th:value="수정" type="submit">
+                    </div>
+                </div>
             </form>
-            <a th:href="@{/delete/{boardId}/comment/{commentId}(boardId=${board.getBoardId()},commentId=${comment.getCommentId()})}">comment
-                삭제</a>
+            <a class="btn btn-danger"
+               th:href="@{/delete/{boardId}/comment/{commentId}(boardId=${board.getBoardId()},commentId=${comment.getCommentId()})}">comment 삭제</a>
             <hr/>
         </ul>
     </div>
-    <div th:if="${#lists.isEmpty(board.getComments())}">
+    <div style="text-align: center" th:if="${#lists.isEmpty(board.getComments())}">
         <td colspan="3" style="text-align: center">조회된 결과가 없습니다.</td>
     </div>
-    </tr>
+    <hr/>
     <form action="#" th:action="@{/comment/{boardId}(boardId=${board.getBoardId()})}" th:method="post">
         <div class="form-group row">
-            <label for="content" class="col-sm-2 col-form-label">content</label>
+            <label class="col-sm-2 col-form-label" for="content">content</label>
             <div class="col-sm-10">
-                <input type="text" class="form-control" name="content" id="content" placeholder="댓글을 입력하세요">
+                <input class="form-control" id="content" name="content" placeholder="댓글을 입력하세요" type="text">
             </div>
         </div>
-        <button type="submit" class="btn btn-primary">댓글 달기</button>
+        <button class="btn btn-primary" type="submit">댓글 달기</button>
     </form>
 
     <hr/>
     <button class="btn btn-success" onclick="location.href='/list'" type="button">Board List</button>
-    <a class="btn btn-danger" th:href="@{/delete/{boardId}(boardId=${board.getBoardId()})}" role="button">Delete</a>
+    <a class="btn btn-danger" role="button" th:href="@{/delete/{boardId}(boardId=${board.getBoardId()})}">Delete</a>
+</div>
 </body>
 </html>

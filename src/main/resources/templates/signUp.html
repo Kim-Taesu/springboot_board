@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>SignUp Page</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
-          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link crossorigin="anonymous" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" rel="stylesheet">
 </head>
 <body>
 
@@ -34,28 +34,29 @@
     <form th:action="@{/account/signUp}" th:method="post">
         <div class="form-group">
             <label for="id">Id</label>
-            <input id="id" name="id" type="text" class="form-control" placeholder="Enter Id" required>
+            <input class="form-control" id="id" name="id" placeholder="Enter Id" required type="text">
         </div>
         <div class="form-group">
             <label for="password">Password</label>
-            <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+            <input class="form-control" id="password" name="password" placeholder="Password" required type="password">
         </div>
         <div class="form-group">
             <label for="name">Name</label>
-            <input id="name" name="name" type="text" class="form-control" placeholder="Enter Name" required>
+            <input class="form-control" id="name" name="name" placeholder="Enter Name" required type="text">
         </div>
         <div class="form-group">
             <label for="age">Age</label>
-            <input type="number" id="age" name="age" class="form-control" placeholder="Enter age" required>
+            <input class="form-control" id="age" name="age" placeholder="Enter age" required type="number">
         </div>
         <div class="form-group">
             <label for="email">Email address</label>
-            <input type="email" class="form-control" name="eMail" id="email" aria-describedby="emailHelp"
-                   placeholder="Enter email" required>
-            <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+            <input aria-describedby="emailHelp" class="form-control" id="email" name="eMail" placeholder="Enter email"
+                   required type="email">
+            <small class="form-text text-muted" id="emailHelp">We'll never share your email with anyone else.</small>
         </div>
-        <button type="submit" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter">Submit</button>
-        <button type="reset" class="btn btn-danger">Reset</button>
+        <button class="btn btn-primary" data-target="#exampleModalCenter" data-toggle="modal" type="submit">Submit
+        </button>
+        <button class="btn btn-danger" type="reset">Reset</button>
     </form>
 
 </div>

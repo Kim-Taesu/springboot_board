@@ -4,7 +4,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
-public class HomeController {
+public class IndexController {
     private final String VISIT_TIME = "visitTime";
     private final String ACCOUNT = "account";
 

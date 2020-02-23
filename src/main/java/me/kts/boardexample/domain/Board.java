@@ -1,9 +1,10 @@
 package me.kts.boardexample.domain;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.*;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.validation.constraints.NotNull;
@@ -14,7 +15,9 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class Board {
+
     @Id
     private String boardId;
 
@@ -26,13 +29,21 @@ public class Board {
 
     private List<Comment> comments = new ArrayList<>();
 
+    @CreatedBy
     private String createdBy;
 
+    @CreatedDate
     private String createDate;
 
+    @LastModifiedBy
     private String lastModifiedBy;
 
+    @LastModifiedDate
     private String lastModifiedDate;
+
+    public void addComment(Comment comment) {
+        this.comments.add(comment);
+    }
 
     @Override
     public String toString() {
