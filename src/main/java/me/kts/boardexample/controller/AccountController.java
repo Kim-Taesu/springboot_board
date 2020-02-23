@@ -25,6 +25,54 @@ public class AccountController {
         this.service = service;
     }
 
+    @GetMapping("/detail")
+    public String detail(HttpSession session,
+                         Model model) {
+        String id = (String) session.getAttribute("id");
+        Account account = service.getInfo(id);
+        if (account == null) {
+            model.addAttribute("message", "fail to get user info");
+        } else {
+            model.addAttribute("account", account);
+        }
+        return "user-detail";
+    }
+
+    @GetMapping("/delete/{accountId}")
+    public String delete(HttpSession session,
+                         @PathVariable String accountId,
+                         Model model) {
+        String id = (String) session.getAttribute("id");
+        if (id.equals(accountId)) {
+            if (service.deleteUser(accountId)) {
+                model.addAttribute("message", "delete success");
+                return "redirect:/account/logout";
+            } else {
+                model.addAttribute("message", "delete fail");
+            }
+        } else {
+            model.addAttribute("message", "wrong user");
+        }
+        return "user-detail";
+    }
+
+    @PostMapping("/detail")
+    public String update(HttpSession session,
+                         RedirectAttributes attributes,
+                         @Valid Account account) {
+        String id = (String) session.getAttribute("id");
+        if (account.getId().equals(id)) {
+            if (service.updateInfo(account)) {
+                attributes.addFlashAttribute("message", "update success");
+            } else {
+                attributes.addFlashAttribute("message", "update fail");
+            }
+        } else {
+            attributes.addFlashAttribute("message", "wrong user");
+        }
+        return "redirect:/account/detail";
+    }
+
     @GetMapping("/login")
     public String loginPage() {
         return "login";
