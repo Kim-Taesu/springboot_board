@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.*;
+import org.springframework.data.domain.Persistable;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.validation.constraints.NotNull;
@@ -16,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Board {
+public class Board implements Persistable<String> {
 
     @Id
     private String boardId;
@@ -24,7 +25,6 @@ public class Board {
     @NotNull
     private String title;
 
-    @NotNull
     private String content;
 
     private List<Comment> comments = new ArrayList<>();
@@ -41,6 +41,8 @@ public class Board {
     @LastModifiedDate
     private String lastModifiedDate;
 
+    private boolean persisted = false;
+
     public void addComment(Comment comment) {
         this.comments.add(comment);
     }
@@ -53,5 +55,15 @@ public class Board {
 
     public void makeId(String userId, String title) {
         this.setBoardId(userId + title);
+    }
+
+    @Override
+    public String getId() {
+        return this.boardId;
+    }
+
+    @Override
+    public boolean isNew() {
+        return !this.persisted;
     }
 }

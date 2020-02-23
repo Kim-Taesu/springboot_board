@@ -35,7 +35,7 @@ public class AccountController {
         } else {
             model.addAttribute("account", account);
         }
-        return "user-detail";
+        return "account/user-detail";
     }
 
     @GetMapping("/delete/{accountId}")
@@ -53,7 +53,7 @@ public class AccountController {
         } else {
             model.addAttribute("message", "wrong user");
         }
-        return "user-detail";
+        return "account/user-detail";
     }
 
     @PostMapping("/detail")
@@ -75,12 +75,12 @@ public class AccountController {
 
     @GetMapping("/login")
     public String loginPage() {
-        return "login";
+        return "account/login";
     }
 
     @GetMapping("/signUp")
     public String signUpPage() {
-        return "signUp";
+        return "account/signUp";
     }
 
     @PostMapping("/login")
@@ -110,7 +110,7 @@ public class AccountController {
         }
         if (service.signupcheck(account)) {
             model.addAttribute("message", "signUp success");
-            return "login";
+            return "account/login";
         } else {
             attributes.addFlashAttribute("message", "signUp fail");
             return "redirect:/account/signUp";

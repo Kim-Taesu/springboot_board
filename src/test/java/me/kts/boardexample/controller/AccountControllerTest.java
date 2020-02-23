@@ -51,7 +51,7 @@ public class AccountControllerTest extends BaseControllerTest {
         //then
         actions
                 .andExpect(status().isOk())
-                .andExpect(view().name("login"));
+                .andExpect(view().name("account/login"));
     }
 
     @Test
@@ -63,7 +63,7 @@ public class AccountControllerTest extends BaseControllerTest {
         //then
         actions
                 .andExpect(status().isOk())
-                .andExpect(view().name("signUp"));
+                .andExpect(view().name("account/signUp"));
     }
 
     @Test
@@ -199,6 +199,6 @@ public class AccountControllerTest extends BaseControllerTest {
         // then
         actions
                 .andExpect(status().isOk())
-                .andExpect(view().name("login"));
+                .andExpect(view().name("account/login"));
     }
 }

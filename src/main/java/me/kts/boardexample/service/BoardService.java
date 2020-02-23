@@ -17,7 +17,7 @@ public class BoardService {
 
     private final BoardRepository repository;
     private final BoardCustomRepository customRepository;
-    private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yy. MM. dd a HH:mm");
 
     public BoardService(BoardRepository repository, BoardCustomRepository customRepository) {
         this.repository = repository;
@@ -34,14 +34,11 @@ public class BoardService {
         if (byId.isPresent()) {
             return false;
         } else {
-            Date date = new Date();
             Board board = Board.builder()
                     .title(boardDto.getTitle())
                     .content(boardDto.getContent())
                     .createdBy(userId)
                     .lastModifiedBy(userId)
-                    .createDate(simpleDateFormat.format(date))
-                    .lastModifiedDate(simpleDateFormat.format(date))
                     .build();
             board.makeId(board.getCreatedBy(), board.getTitle());
             repository.save(board);
@@ -64,16 +61,15 @@ public class BoardService {
         }
     }
 
-    public boolean update(String userId, Board newBoard) {
-        Optional<Board> byId = repository.findById(newBoard.getBoardId());
+    public boolean update(String userId, BoardDto newBoard, String boardId) {
+        Optional<Board> byId = repository.findById(boardId);
         if (byId.isPresent()) {
             Board board = byId.get();
             if (board.getCreatedBy().equals(userId)) {
                 board.setTitle(newBoard.getTitle());
                 board.setContent(newBoard.getContent());
                 board.setLastModifiedBy(userId);
-                Date date = new Date();
-                board.setLastModifiedDate(simpleDateFormat.format(date));
+                board.setPersisted(true);
                 repository.save(board);
                 return true;
             }
@@ -91,7 +87,6 @@ public class BoardService {
         if (byId.isPresent()) {
             Board board = byId.get();
             Date date = new Date();
-
             Comment comment = Comment.builder()
                     .commentId(userId + content)
                     .userId(userId)
@@ -101,8 +96,8 @@ public class BoardService {
                     .createDate(simpleDateFormat.format(date))
                     .lastModifiedDate(simpleDateFormat.format(date))
                     .build();
-
             board.addComment(comment);
+            board.setPersisted(true);
             repository.save(board);
             return true;
         } else {
@@ -122,6 +117,7 @@ public class BoardService {
                         comment.setContent(newContent);
                         comment.setLastModifiedBy(userId);
                         comment.setLastModifiedDate(simpleDateFormat.format(new Date()));
+                        board.setPersisted(true);
                         repository.save(board);
                         return true;
                     }

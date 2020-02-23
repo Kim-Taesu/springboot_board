@@ -18,22 +18,22 @@ public class Comment {
 
     @Id
     @NotNull
-    String commentId;
+    private String commentId;
 
     @NotNull
-    String userId;
+    private String userId;
 
     @NotNull
-    String boardId;
+    private String boardId;
 
     @NotNull
-    String content;
+    private String content;
 
-    String createdBy;
+    private String createdBy;
 
-    String createDate;
+    private String createDate;
 
-    String lastModifiedBy;
+    private String lastModifiedBy;
 
-    String lastModifiedDate;
+    private String lastModifiedDate;
 }

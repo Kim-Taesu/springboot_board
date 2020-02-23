@@ -12,6 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -25,30 +28,25 @@ public class BoardControllerTest extends BaseControllerTest {
 
     @Autowired
     BoardRepository repository;
+    @Autowired
+    LocalValidatorFactoryBean localValidatorFactoryBean;
 
     @Before
-    public void setup(){
+    public void setup() {
         repository.deleteAll();
     }
 
     @Test
     public void create_fail_by_invalid_board() throws Exception {
-        // given
-        BoardDto boardDto = BoardDto.builder()
-                .title("title")
-                .build();
-
         // when
-        ResultActions actions = mockMvc.perform(post("/create")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(boardDto))
+        ResultActions actions = mockMvc.perform(post("/board/create")
+                .param("title", "test_title")
                 .session(generateSession()))
                 .andDo(print());
 
         // then
         actions
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/list"));
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -57,7 +55,7 @@ public class BoardControllerTest extends BaseControllerTest {
         BoardDto boardDto = generateBoardDto("title", "content");
 
         // when
-        ResultActions actions = mockMvc.perform(post("/create")
+        ResultActions actions = mockMvc.perform(post("/board/create")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(boardDto)))
                 .andDo(print());
@@ -70,20 +68,17 @@ public class BoardControllerTest extends BaseControllerTest {
 
     @Test
     public void create_success() throws Exception {
-        // given
-        BoardDto boardDto = generateBoardDto("title", "content");
-
         // when
-        ResultActions actions = mockMvc.perform(post("/create")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(boardDto))
+        ResultActions actions = mockMvc.perform(post("/board/create")
+                .param("title", "title")
+                .param("content", "content")
                 .session(generateSession()))
                 .andDo(print());
 
         // then
         actions
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/list"));
+                .andExpect(redirectedUrl("/board/list"));
     }
 
     private BoardDto generateBoardDto(String title, String content) {
@@ -122,20 +117,17 @@ public class BoardControllerTest extends BaseControllerTest {
 
         repository.save(board);
 
-        board.setTitle("title update!");
-        board.setContent("content update!");
-
         // when
-        ResultActions actions = mockMvc.perform(post("/update/" + board.getBoardId())
+        ResultActions actions = mockMvc.perform(post("/board/update/" + board.getBoardId())
                 .session(mockHttpSession)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(board)))
+                .param("title", "title update!")
+                .param("content", "content update!"))
                 .andDo(print());
 
         // then
         actions
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/detail/" + board.getBoardId()))
+                .andExpect(redirectedUrl("/board/detail/" + board.getBoardId()))
                 .andExpect(flash().attribute("message", "update success"));
     }
 
@@ -158,17 +150,49 @@ public class BoardControllerTest extends BaseControllerTest {
         board.setContent("content update!");
 
         // when
-        ResultActions actions = mockMvc.perform(post("/update/" + board.getBoardId())
+        MultiValueMap<String, String> data = new LinkedMultiValueMap<>();
+        data.add("title", "title update");
+        data.add("content", "content update");
+
+        ResultActions actions = mockMvc.perform(post("/board/update/" + board.getBoardId())
                 .session(mockHttpSession)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(board)))
+                .params(data))
                 .andDo(print());
 
         // then
         actions
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/detail/" + board.getBoardId()))
+                .andExpect(redirectedUrl("/board/detail/" + board.getBoardId()))
                 .andExpect(flash().attribute("message", "update fail"));
+    }
+
+    @Test
+    public void create_board_check_date() throws Exception {
+        Board board = Board.builder()
+                .title("title")
+                .content("content")
+                .createdBy("kts")
+                .lastModifiedBy("kts")
+                .build();
+
+        repository.save(board);
+
+        repository.findAll().forEach(b -> {
+            System.out.println(b.getCreateDate());
+            System.out.println(b.getLastModifiedDate());
+        });
+        System.out.println("---------------------------");
+
+        Board newBoard = repository.findById(board.getBoardId()).orElse(null);
+        if (newBoard != null) {
+            newBoard.setTitle("title1");
+            repository.save(newBoard);
+        }
+        repository.findAll().forEach(b -> {
+            System.out.println(b.getCreateDate());
+            System.out.println(b.getLastModifiedDate());
+        });
+
     }
 
     @Test
@@ -187,9 +211,12 @@ public class BoardControllerTest extends BaseControllerTest {
         board.setContent("content update!");
 
         // when
-        ResultActions actions = mockMvc.perform(post("/update/" + board.getBoardId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(board)))
+        MultiValueMap<String, String> dataInfo = new LinkedMultiValueMap<>();
+        dataInfo.add("title", "title_update");
+        dataInfo.add("content", "content_update");
+
+        ResultActions actions = mockMvc.perform(post("/board/update/" + board.getBoardId())
+                .params(dataInfo))
                 .andDo(print());
 
         // then
@@ -207,19 +234,19 @@ public class BoardControllerTest extends BaseControllerTest {
         MockHttpSession session = new MockHttpSession();
         session.setAttribute("id", account.getId());
 
-        ResultActions actions = mockMvc.perform(get("/list")
+        ResultActions actions = mockMvc.perform(get("/board/list")
                 .session(session));
 
         // then
         actions
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(view().name("list"));
+                .andExpect(view().name("board/list"));
     }
 
     @Test
     public void boardList_fail_by_session_not_exist() throws Exception {
-        ResultActions actions = mockMvc.perform(get("/list"))
+        ResultActions actions = mockMvc.perform(get("/board/list"))
                 .andDo(print());
 
         // then

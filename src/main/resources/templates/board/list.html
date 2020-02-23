@@ -15,14 +15,7 @@
         <span class="p-2 text-dark" th:text="'방문시각 : '+${session['visitTime']}">Visit</span>
         <span class="p-2 text-dark" th:text="'사용시간 : '+${session['useTime']}">Use</span>
     </nav>
-
-    <div th:if="${session['id']}">
-        <a class="btn btn-outline-danger" href="/account/logout" role="button">Logout</a>
-    </div>
-    <div th:if="!${session['id']}">
-        <a class="btn btn-outline-primary" href="/account/login" role="button">Login</a>
-        <a class="btn btn-outline-success" href="/account/signUp" role="button">Sign up</a>
-    </div>
+    <a class="btn btn-outline-danger" href="/account/logout" role="button">Logout</a>
 </div>
 
 <div class="card border-danger mb-3" th:if="${message}">
@@ -50,7 +43,8 @@
         <tbody>
         <tr th:each="board: ${boards}" th:unless="${#lists.isEmpty(boards)}">
             <td>
-                <a th:href="@{/detail/{boardId}(boardId=${board.getBoardId()})}" th:text="${board.getTitle()}"></a>
+                <a th:href="@{/board/detail/{boardId}(boardId=${board.getBoardId()})}"
+                   th:text="${board.getTitle()}"></a>
             </td>
             <td th:text="${board.getCreatedBy()}"></td>
             <td th:text="${board.getCreateDate()}"></td>
@@ -64,7 +58,7 @@
 
     <div aria-label="Basic example" class="btn-group" role="group">
         <button class="btn btn-primary" onclick="location.href='/'" type="button">HOME</button>
-        <button class="btn btn-success" onclick="location.href='/create'" type="button">게시글 생성</button>
+        <button class="btn btn-success" onclick="location.href='/board/create'" type="button">게시글 생성</button>
         <button class="btn btn-danger" onclick="location.href='/account/logout'" type="button">로그아웃</button>
     </div>
 </div>

@@ -16,14 +16,7 @@
         <span class="p-2 text-dark" th:text="'방문시각 : '+${session['visitTime']}">Visit</span>
         <span class="p-2 text-dark" th:text="'사용시간 : '+${session['useTime']}">Use</span>
     </nav>
-
-    <div th:if="${session['id']}">
-        <a class="btn btn-outline-danger" href="/account/logout" role="button">Logout</a>
-    </div>
-    <div th:if="!${session['id']}">
-        <a class="btn btn-outline-primary" href="/account/login" role="button">Login</a>
-        <a class="btn btn-outline-success" href="/account/signUp" role="button">Sign up</a>
-    </div>
+    <a class="btn btn-outline-danger" href="/account/logout" role="button">Logout</a>
 </div>
 
 <div class="card border-danger mb-3" th:if="${message}">
@@ -39,7 +32,7 @@
     </div>
 
 
-    <form th:action="@{/update/{boardId}(boardId=${board.getBoardId()})}" th:method="post" th:object="${board}">
+    <form th:action="@{/board/update/{boardId}(boardId=${board.getBoardId()})}" th:method="post" th:object="${board}">
         <div class="form-group row">
             <label class="col-sm-2 col-form-label" for="title">Title</label>
             <div class="col-sm-10">
@@ -96,7 +89,7 @@
     </div>
     <div th:unless="${#lists.isEmpty(board.getComments())}">
         <ul th:each="comment: ${board.getComments()}">
-            <form th:action="@{/update/{boardId}/comment/{commentId}(commentId=${comment.getCommentId()},boardId=${board.getBoardId()})}"
+            <form th:action="@{/board/update/{boardId}/comment/{commentId}(commentId=${comment.getCommentId()},boardId=${board.getBoardId()})}"
                   th:method="post">
                 <div class="card">
                     <div class="card-body">
@@ -110,15 +103,15 @@
                             </div>
                         </div>
                         <div class="form-group row">
-                            <label class="col-sm-2 col-form-label" for="lastModifiedDate">Comment</label>
+                            <label class="col-sm-2 col-form-label" for="commentContent">Comment</label>
                             <div class="col-sm-10">
-                                <input class="form-control" id="commentContent" name="content"
+                                <input class="form-control" id="commentContent" name="comment"
                                        th:value="${comment.getContent()}"
                                        type="text">
                             </div>
                         </div>
                         <div class="form-group row">
-                            <label class="col-sm-2 col-form-label" for="lastModifiedDate">Create Date</label>
+                            <label class="col-sm-2 col-form-label" for="commentCreatedDate">Create Date</label>
                             <div class="col-sm-10">
                                 <input class="form-control-plaintext" id="commentCreatedDate" name="createDate" readonly
                                        th:value="${comment.getCreateDate()}"
@@ -127,17 +120,18 @@
                         </div>
 
                         <div class="form-group row">
-                            <label class="col-sm-2 col-form-label" for="lastModifiedDate">Update Date</label>
+                            <label class="col-sm-2 col-form-label" for="commentUpdateDate">Update Date</label>
                             <div class="col-sm-10">
-                                <input class="form-control-plaintext" id="commentUpdateDate" name="lastModifiedDate" readonly
-                                       th:value="${comment.getUserId()}"
+                                <input class="form-control-plaintext" id="commentUpdateDate" name="lastModifiedDate"
+                                       readonly
+                                       th:value="${comment.getLastModifiedDate()}"
                                        type="text">
                             </div>
                         </div>
 
                         <button class="btn btn-info" type="submit">수정</button>
                         <a class="btn btn-danger"
-                           th:href="@{/delete/{boardId}/comment/{commentId}(boardId=${board.getBoardId()},commentId=${comment.getCommentId()})}">comment
+                           th:href="@{/board/delete/{boardId}/comment/{commentId}(boardId=${board.getBoardId()},commentId=${comment.getCommentId()})}">comment
                             삭제</a>
                     </div>
                 </div>
@@ -149,19 +143,20 @@
         <td colspan="3" style="text-align: center">조회된 결과가 없습니다.</td>
     </div>
     <hr/>
-    <form action="#" th:action="@{/comment/{boardId}(boardId=${board.getBoardId()})}" th:method="post">
+    <form action="#" th:action="@{/board/comment/{boardId}(boardId=${board.getBoardId()})}" th:method="post">
         <div class="form-group row">
-            <label class="col-sm-2 col-form-label" for="content">content</label>
+            <label class="col-sm-2 col-form-label" for="comment">content</label>
             <div class="col-sm-10">
-                <input class="form-control" id="content" name="content" placeholder="댓글을 입력하세요" type="text">
+                <input class="form-control" id="comment" name="comment" placeholder="댓글을 입력하세요" type="text">
             </div>
         </div>
         <button class="btn btn-primary" type="submit">댓글 달기</button>
     </form>
 
     <hr/>
-    <button class="btn btn-success" onclick="location.href='/list'" type="button">Board List</button>
-    <a class="btn btn-danger" role="button" th:href="@{/delete/{boardId}(boardId=${board.getBoardId()})}">Delete</a>
+    <button class="btn btn-success" onclick="location.href='/board/list'" type="button">Board List</button>
+    <a class="btn btn-danger" role="button"
+       th:href="@{/board/delete/{boardId}(boardId=${board.getBoardId()})}">Delete</a>
 </div>
 </body>
 </html>
