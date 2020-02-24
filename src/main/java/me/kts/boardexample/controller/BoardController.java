@@ -14,6 +14,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
+import java.security.Principal;
 
 @Slf4j
 @Controller
@@ -75,11 +76,11 @@ public class BoardController {
 
     @PostMapping("/update/{boardId}")
     public String update(RedirectAttributes attributes,
-                         HttpSession session,
                          @PathVariable String boardId,
                          @Valid BoardDto boardDto,
-                         BindingResult bindingResult) {
-        String id = (String) session.getAttribute("id");
+                         BindingResult bindingResult,
+                         Principal principal) {
+        String id = principal.getName();
         if (bindingResult.hasErrors()) {
             bindingResult.getFieldErrors().forEach(c -> {
                 attributes.addFlashAttribute("message", c.getField() + " : " + c.getDefaultMessage());
@@ -96,8 +97,8 @@ public class BoardController {
     @GetMapping("/delete/{boardId}")
     public String delete(RedirectAttributes attributes,
                          @PathVariable String boardId,
-                         HttpSession session) {
-        String userId = (String) session.getAttribute("id");
+                         Principal principal) {
+        String userId = principal.getName();
         if (service.delete(userId, boardId)) {
             attributes.addFlashAttribute("message", "delete success");
             return "redirect:/board/list";
@@ -111,8 +112,8 @@ public class BoardController {
     public String createComment(@PathVariable String boardId,
                                 @Valid CommentDto commentDto,
                                 RedirectAttributes attributes,
-                                HttpSession session) {
-        String userId = (String) session.getAttribute("id");
+                                Principal principal) {
+        String userId = principal.getName();
         if (service.createComment(userId, boardId, commentDto.getComment())) {
             attributes.addFlashAttribute("message", "create comment success");
         } else {
@@ -126,8 +127,8 @@ public class BoardController {
                                 @PathVariable String boardId,
                                 @PathVariable String commentId,
                                 @Valid CommentDto commentDto,
-                                HttpSession session) {
-        String id = (String) session.getAttribute("id");
+                                Principal principal) {
+        String id = principal.getName();
         String message;
         if (service.updateComment(id, commentId, boardId, commentDto.getComment())) {
             message = "update comment success";
@@ -142,8 +143,8 @@ public class BoardController {
     public String deleteComment(RedirectAttributes attributes,
                                 @PathVariable String boardId,
                                 @PathVariable String commentId,
-                                HttpSession session) {
-        String id = (String) session.getAttribute("id");
+                                Principal principal) {
+        String id = principal.getName();
         String message;
         if (service.deleteComment(id, boardId, commentId)) {
             message = "delete comment success";

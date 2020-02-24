@@ -4,8 +4,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.domain.Persistable;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.Min;
@@ -16,7 +19,7 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Account {
+public class Account implements Persistable<String> {
     @Id
     @NotNull
     String id;
@@ -32,4 +35,21 @@ public class Account {
 
     @Email
     String eMail;
+
+    @CreatedDate
+    String createdDate;
+
+    private boolean persisted;
+
+    private String role;
+
+    public void encodePassword(PasswordEncoder passwordEncoder) {
+        this.password = passwordEncoder.encode(password);
+    }
+
+
+    @Override
+    public boolean isNew() {
+        return !this.persisted;
+    }
 }

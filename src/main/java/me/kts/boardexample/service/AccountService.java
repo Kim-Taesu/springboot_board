@@ -1,46 +1,37 @@
 package me.kts.boardexample.service;
 
+import lombok.extern.slf4j.Slf4j;
 import me.kts.boardexample.domain.Account;
 import me.kts.boardexample.repository.AccountRepository;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.http.HttpSession;
-import javax.validation.constraints.NotNull;
 import java.util.Optional;
 
 @Service
-public class AccountService {
+@Slf4j
+public class AccountService implements UserDetailsService {
 
     private final String ACCOUNT = "id";
     private final AccountRepository repository;
+    private final PasswordEncoder passwordEncoder;
 
-    public AccountService(AccountRepository repository) {
+    public AccountService(AccountRepository repository, PasswordEncoder passwordEncoder) {
         this.repository = repository;
+        this.passwordEncoder = passwordEncoder;
     }
 
-    public boolean loginCheck(String id,
-                              String password) {
-        Optional<Account> byId = repository.findById(id);
-        if (byId.isPresent()) {
-            Account account = byId.get();
-            return account.getPassword().equals(password);
-        } else {
-            return false;
-        }
-    }
-
-    public boolean signupcheck(Account account) {
+    public boolean signUpCheck(Account account) {
         Optional<Account> byId = repository.findById(account.getId());
         if (byId.isPresent()) {
             return false;
         } else {
-            repository.save(account);
             return true;
         }
-    }
-
-    public void logout(HttpSession session) {
-        session.removeAttribute(ACCOUNT);
     }
 
     public Account getInfo(String id) {
@@ -48,13 +39,14 @@ public class AccountService {
     }
 
     public boolean updateInfo(Account account) {
-        @NotNull String id = account.getId();
-        Account byId = repository.findById(id).orElse(null);
+        Account byId = repository.findById(account.getId()).orElse(null);
         if (byId != null) {
             byId.setPassword(account.getPassword());
+            byId.encodePassword(passwordEncoder);
             byId.setName(account.getName());
             byId.setAge(account.getAge());
             byId.setEMail(account.getEMail());
+            byId.setPersisted(true);
             repository.save(byId);
             return true;
         } else {
@@ -65,6 +57,31 @@ public class AccountService {
     public boolean deleteUser(String accountId) {
         try {
             repository.deleteById(accountId);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String id) throws UsernameNotFoundException {
+        Account account = repository.findById(id).orElse(null);
+        if (account == null) {
+            throw new UsernameNotFoundException(id);
+        }
+        return User.builder()
+                .username(account.getId())
+                .password(account.getPassword())
+                .roles(account.getRole())
+                .build();
+    }
+
+
+    public boolean signUp(Account account) {
+        try {
+            account.setRole("USER");
+            account.encodePassword(passwordEncoder);
+            repository.save(account);
         } catch (Exception e) {
             return false;
         }

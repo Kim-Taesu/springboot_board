@@ -2,7 +2,7 @@
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Index Page</title>
+    <title>Index</title>
     <link crossorigin="anonymous" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
           integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" rel="stylesheet">
 </head>
@@ -18,10 +18,13 @@
     </nav>
 
     <div th:if="${session['id']}">
-        <a class="btn btn-outline-danger" href="/account/logout" role="button">Logout</a>
+        <form action="/account/logout" th:method="post">
+            <input th:name="${_csrf.parameterName}" th:value="${_csrf.token}" type="hidden"/>
+            <button class="btn btn-outline-danger" type="submit">Logout</button>
+        </form>
     </div>
     <div th:if="!${session['id']}">
-        <a class="btn btn-outline-primary" href="/account/login" role="button">Login</a>
+        <a class="btn btn-outline-primary" href="/account/loginPage" role="button">Login</a>
         <a class="btn btn-outline-success" href="/account/signUp" role="button">Sign up</a>
     </div>
 </div>

@@ -15,7 +15,10 @@
         <span class="p-2 text-dark" th:text="'방문시각 : '+${session['visitTime']}">Visit</span>
         <span class="p-2 text-dark" th:text="'사용시간 : '+${session['useTime']}">Use</span>
     </nav>
-    <a class="btn btn-outline-danger" href="/account/logout" role="button">Logout</a>
+    <form action="/account/logout" th:method="post">
+        <input th:name="${_csrf.parameterName}" th:value="${_csrf.token}" type="hidden"/>
+        <button class="btn btn-outline-danger" type="submit">Logout</button>
+    </form>
 </div>
 
 <div class="card border-danger mb-3" th:if="${message}">
@@ -56,11 +59,8 @@
         </tbody>
     </table>
 
-    <div aria-label="Basic example" class="btn-group" role="group">
-        <button class="btn btn-primary" onclick="location.href='/'" type="button">HOME</button>
-        <button class="btn btn-success" onclick="location.href='/board/create'" type="button">게시글 생성</button>
-        <button class="btn btn-danger" onclick="location.href='/account/logout'" type="button">로그아웃</button>
-    </div>
+    <button class="btn btn-primary" onclick="location.href='/'" type="button">HOME</button>
+    <button class="btn btn-success" onclick="location.href='/board/create'" type="button">게시글 생성</button>
 </div>
 </body>
 

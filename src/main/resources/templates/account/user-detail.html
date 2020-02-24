@@ -2,7 +2,7 @@
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Create Page</title>
+    <title>User Detail</title>
     <link crossorigin="anonymous" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
           integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" rel="stylesheet">
 
@@ -17,13 +17,10 @@
         <span class="p-2 text-dark" th:text="'사용시간 : '+${session['useTime']}">Use</span>
     </nav>
 
-    <div th:if="${session['id']}">
-        <a class="btn btn-outline-danger" href="/account/logout" role="button">Logout</a>
-    </div>
-    <div th:if="!${session['id']}">
-        <a class="btn btn-outline-primary" href="/account/login" role="button">Login</a>
-        <a class="btn btn-outline-success" href="/account/signUp" role="button">Sign up</a>
-    </div>
+    <form action="/account/logout" th:method="post">
+        <input th:name="${_csrf.parameterName}" th:value="${_csrf.token}" type="hidden"/>
+        <button class="btn btn-outline-danger" type="submit">Logout</button>
+    </form>
 </div>
 
 <div class="card border-danger mb-3" th:if="${message}">
@@ -35,7 +32,7 @@
 <div class="container">
 
     <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
-        <h1 class="display-4">Board Info</h1>
+        <h1 class="display-4">User Info</h1>
     </div>
 
 
@@ -48,29 +45,30 @@
             </div>
         </div>
         <div class="form-group row">
-            <label class="col-sm-2 col-form-label" for="password">Password</label>
+            <label class="col-sm-2 col-form-label" for="password">New Password</label>
             <div class="col-sm-10">
-                <input class="form-control" id="password" name="password" th:value="*{getPassword()}" type="text">
+                <input class="form-control" id="password" name="password" placeholder="새 비밀번호 입력" type="text">
             </div>
         </div>
 
         <div class="form-group row">
             <label class="col-sm-2 col-form-label" for="name">Name</label>
             <div class="col-sm-10">
-                <input class="form-control" id="name" name="name"
-                       th:value="*{getName()}"
-                       type="text">
+                <input class="form-control-plaintext" id="name" name="name"
+                       readonly
+                       th:value="*{getName()}" type="text">
             </div>
         </div>
 
         <div class="form-group row">
             <label class="col-sm-2 col-form-label" for="age">Age</label>
             <div class="col-sm-10">
-                <input class="form-control" id="age" name="age"
-                       th:value="*{getAge()}"
-                       type="number">
+                <input class="form-control-plaintext" id="age" name="age"
+                       readonly
+                       th:value="*{getAge()}" type="number">
             </div>
         </div>
+
         <div class="form-group row">
             <label class="col-sm-2 col-form-label" for="eMail">E-Mail</label>
             <div class="col-sm-10">
@@ -79,12 +77,21 @@
             </div>
         </div>
 
-        <button class="btn btn-primary" type="submit">Update</button>
-        <a class="btn btn-danger" role="button" th:href="@{/account/delete/{accountId}(accountId=${account.getId()})}">Delete</a>
+        <div class="form-group row">
+            <label class="col-sm-2 col-form-label" for="createdDate">Created Date</label>
+            <div class="col-sm-10">
+                <input class="form-control-plaintext" id="createdDate" name="createdDate"
+                       readonly
+                       th:value="*{getCreatedDate()}" type="text">
+            </div>
+        </div>
+
+        <button class="btn btn-warning" type="submit">수정</button>
+        <a class="btn btn-danger" role="button" th:href="@{/account/delete/{accountId}(accountId=${account.getId()})}">삭제</a>
     </form>
 
     <hr/>
-    <button class="btn btn-success" onclick="location.href='/'" type="button">Home</button>
+    <button class="btn btn-primary" onclick="location.href='/'" type="button">Home</button>
 
 </div>
 </body>

@@ -13,21 +13,26 @@ import java.time.temporal.ChronoUnit;
 @Slf4j
 public class VisitTimeInterceptor implements HandlerInterceptor {
 
-    private final String ACCOUNT = "id";
-    private final String VISIT_TIME = "visitTime";
-    private final String USE_TIME = "useTime";
-
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+
+        String ACCOUNT = "id";
+        if (request.getUserPrincipal() != null) {
+            request.getSession().setAttribute(ACCOUNT, request.getUserPrincipal().getName());
+        }
+
+
         log.info("visitTime interceptor preHandler");
         // session 정보 가져오기
         HttpSession session = request.getSession();
         // 로그인한 상태라면
+        String VISIT_TIME = "visitTime";
         if (session.getAttribute(ACCOUNT) != null) {
             log.info("\taccount exists");
             // date format
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy년 M월 d일 a h시 m분 s초");
             // 방문 시간이 존재하면
+            String USE_TIME = "useTime";
             if (session.getAttribute(VISIT_TIME) == null) {
                 log.info("\tvisit time not exists");
                 // 현재 방문시간 계산

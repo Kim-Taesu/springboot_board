@@ -9,9 +9,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
+import java.security.Principal;
 
 @Controller
 @RequestMapping(value = "/account")
@@ -26,9 +25,9 @@ public class AccountController {
     }
 
     @GetMapping("/detail")
-    public String detail(HttpSession session,
-                         Model model) {
-        String id = (String) session.getAttribute("id");
+    public String detail(Model model,
+                         Principal principal) {
+        String id = principal.getName();
         Account account = service.getInfo(id);
         if (account == null) {
             model.addAttribute("message", "fail to get user info");
@@ -39,28 +38,22 @@ public class AccountController {
     }
 
     @GetMapping("/delete/{accountId}")
-    public String delete(HttpSession session,
-                         @PathVariable String accountId,
+    public String delete(@PathVariable String accountId,
                          Model model) {
-        String id = (String) session.getAttribute("id");
-        if (id.equals(accountId)) {
-            if (service.deleteUser(accountId)) {
-                model.addAttribute("message", "delete success");
-                return "redirect:/account/logout";
-            } else {
-                model.addAttribute("message", "delete fail");
-            }
+        if (service.deleteUser(accountId)) {
+            model.addAttribute("message", "delete success");
+            return "account/login";
         } else {
-            model.addAttribute("message", "wrong user");
+            model.addAttribute("message", "delete fail");
+            return "account/user-detail";
         }
-        return "account/user-detail";
     }
 
     @PostMapping("/detail")
-    public String update(HttpSession session,
+    public String update(Principal principal,
                          RedirectAttributes attributes,
                          @Valid Account account) {
-        String id = (String) session.getAttribute("id");
+        String id = principal.getName();
         if (account.getId().equals(id)) {
             if (service.updateInfo(account)) {
                 attributes.addFlashAttribute("message", "update success");
@@ -73,7 +66,7 @@ public class AccountController {
         return "redirect:/account/detail";
     }
 
-    @GetMapping("/login")
+    @GetMapping("/loginPage")
     public String loginPage() {
         return "account/login";
     }
@@ -83,44 +76,24 @@ public class AccountController {
         return "account/signUp";
     }
 
-    @PostMapping("/login")
-    public String login(@RequestParam String id,
-                        @RequestParam String password,
-                        RedirectAttributes attributes,
-                        HttpSession session) {
-        if (service.loginCheck(id, password)) {
-            session.setAttribute("id", id);
-            return "redirect:/";
-        } else {
-            attributes.addFlashAttribute("message", "id / pw 오류");
-            return "redirect:/account/login";
-        }
-    }
-
     @PostMapping("/signUp")
     public String signUp(Model model,
                          @Valid @ModelAttribute Account account,
-                         BindingResult bindingResult,
-                         RedirectAttributes attributes) {
+                         BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             bindingResult.getFieldErrors().forEach(c -> {
-                attributes.addFlashAttribute("message", c.getField() + " : " + c.getDefaultMessage());
+                model.addAttribute("message", c.getField() + " : " + c.getDefaultMessage());
             });
-            return "redirect:/account/signUp";
+            return "/account/signUp";
         }
-        if (service.signupcheck(account)) {
-            model.addAttribute("message", "signUp success");
-            return "account/login";
-        } else {
-            attributes.addFlashAttribute("message", "signUp fail");
-            return "redirect:/account/signUp";
+        if (service.signUpCheck(account)) {
+            if (service.signUp(account)) {
+                model.addAttribute("message", "signUp success");
+                return "account/login";
+            }
         }
-    }
-
-    @GetMapping("/logout")
-    public String logout(HttpServletRequest request) {
-        service.logout(request.getSession());
-        return "redirect:/";
+        model.addAttribute("message", "signUp fail");
+        return "/account/signUp";
     }
 }
 

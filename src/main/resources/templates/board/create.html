@@ -2,7 +2,7 @@
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Create Page</title>
+    <title>Board Create</title>
     <link crossorigin="anonymous" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
           integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" rel="stylesheet">
 
@@ -15,7 +15,10 @@
         <span class="p-2 text-dark" th:text="'방문시각 : '+${session['visitTime']}">Visit</span>
         <span class="p-2 text-dark" th:text="'사용시간 : '+${session['useTime']}">Use</span>
     </nav>
-    <a class="btn btn-outline-danger" href="/account/logout" role="button">Logout</a>
+    <form action="/account/logout" th:method="post">
+        <input th:name="${_csrf.parameterName}" th:value="${_csrf.token}" type="hidden"/>
+        <button class="btn btn-outline-danger" type="submit">Logout</button>
+    </form>
 </div>
 
 <div class="card border-danger mb-3" th:if="${message}">
@@ -38,8 +41,8 @@
             <label for="content">Content</label>
             <textarea class="form-control" id="content" name="content" rows="5"></textarea>
         </div>
-        <button class="btn btn-primary" type="submit">Submit</button>
-        <button class="btn btn-danger" type="reset">Reset</button>
+        <button class="btn btn-primary" type="submit">게시글 생성</button>
+        <button class="btn btn-danger" type="reset">초기화</button>
     </form>
 </div>
 </body>
