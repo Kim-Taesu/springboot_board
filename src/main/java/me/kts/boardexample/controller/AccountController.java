@@ -9,7 +9,9 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
+import java.util.Enumeration;
 
 @Controller
 @RequestMapping(value = "/account")
@@ -37,10 +39,12 @@ public class AccountController {
 
     @GetMapping("/delete/{accountId}")
     public String delete(@PathVariable String accountId,
+                         RedirectAttributes attributes,
+                         HttpSession session,
                          Model model) {
         if (service.deleteUser(accountId)) {
-            model.addAttribute("message", "delete success");
-            return "account/login";
+            attributes.addFlashAttribute("message", "delete success");
+            return "redirect:/account/loginPage";
         } else {
             model.addAttribute("message", "delete fail");
             return "account/user-detail";
@@ -59,7 +63,11 @@ public class AccountController {
     }
 
     @GetMapping("/loginPage")
-    public String loginPage() {
+    public String loginPage(HttpSession session) {
+        Enumeration<String> attributeNames = session.getAttributeNames();
+        while (attributeNames.hasMoreElements()) {
+            System.out.println(attributeNames.nextElement());
+        }
         return "account/login";
     }
 

@@ -63,12 +63,19 @@ public class AccountService implements UserDetailsService {
     }
 
     public boolean deleteUser(String accountId) {
-        try {
-            repository.deleteById(accountId);
-        } catch (Exception e) {
+        UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal.getUsername().equals(accountId)) {
+            try {
+                repository.deleteById(accountId);
+                SecurityContextHolder.clearContext();
+            } catch (Exception e) {
+                return false;
+            }
+            return true;
+        } else {
             return false;
         }
-        return true;
+
     }
 
     @Override
