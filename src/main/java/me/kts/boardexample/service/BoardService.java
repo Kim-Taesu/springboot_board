@@ -5,6 +5,8 @@ import me.kts.boardexample.domain.BoardDto;
 import me.kts.boardexample.domain.Comment;
 import me.kts.boardexample.repository.BoardCustomRepository;
 import me.kts.boardexample.repository.BoardRepository;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
@@ -29,7 +31,8 @@ public class BoardService {
         return repository.findAll();
     }
 
-    public boolean create(String userId, BoardDto boardDto) {
+    public boolean create(BoardDto boardDto) {
+        String userId = getUserId();
         Optional<Board> byId = repository.findById(userId + boardDto.getTitle());
         if (byId.isPresent()) {
             return false;
@@ -46,12 +49,13 @@ public class BoardService {
         }
     }
 
-    public boolean delete(String userId, String id) {
-        Optional<Board> byId = repository.findById(id);
+    public boolean delete(String boardId) {
+        String userId = getUserId();
+        Optional<Board> byId = repository.findById(boardId);
         if (byId.isPresent()) {
             Board board = byId.get();
             if (board.getCreatedBy().equals(userId)) {
-                repository.deleteById(id);
+                repository.deleteById(boardId);
                 return true;
             } else {
                 return false;
@@ -61,7 +65,8 @@ public class BoardService {
         }
     }
 
-    public boolean update(String userId, BoardDto newBoard, String boardId) {
+    public boolean update(BoardDto newBoard, String boardId) {
+        String userId = getUserId();
         Optional<Board> byId = repository.findById(boardId);
         if (byId.isPresent()) {
             Board board = byId.get();
@@ -82,19 +87,19 @@ public class BoardService {
         return byId.orElse(null);
     }
 
-    public boolean createComment(String userId, String id, String content) {
+    public boolean createComment(String id, String content) {
+        String userId = getUserId();
         Optional<Board> byId = repository.findById(id);
         if (byId.isPresent()) {
             Board board = byId.get();
-            Date date = new Date();
             Comment comment = Comment.builder()
                     .commentId(userId + content)
                     .userId(userId)
                     .content(content)
                     .createdBy(userId)
                     .lastModifiedBy(userId)
-                    .createDate(simpleDateFormat.format(date))
-                    .lastModifiedDate(simpleDateFormat.format(date))
+                    .createDate(getTime())
+                    .lastModifiedDate(getTime())
                     .build();
             board.addComment(comment);
             board.setPersisted(true);
@@ -105,7 +110,17 @@ public class BoardService {
         }
     }
 
-    public boolean updateComment(String userId, String commentId, String boardId, String newContent) {
+    private String getTime() {
+        return simpleDateFormat.format(new Date());
+    }
+
+    private String getUserId() {
+        UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return principal.getUsername();
+    }
+
+    public boolean updateComment(String commentId, String boardId, String newContent) {
+        String userId = getUserId();
         Optional<Board> byId = repository.findById(boardId);
         if (byId.isPresent()) {
             Board board = byId.get();
@@ -116,7 +131,7 @@ public class BoardService {
                         comment.setCommentId(userId + newContent);
                         comment.setContent(newContent);
                         comment.setLastModifiedBy(userId);
-                        comment.setLastModifiedDate(simpleDateFormat.format(new Date()));
+                        comment.setLastModifiedDate(getTime());
                         board.setPersisted(true);
                         repository.save(board);
                         return true;
@@ -127,7 +142,8 @@ public class BoardService {
         return false;
     }
 
-    public boolean deleteComment(String userId, String boardId, String commentId) {
+    public boolean deleteComment(String boardId, String commentId) {
+        String userId = getUserId();
         Optional<Board> byId = repository.findById(boardId);
         if (byId.isPresent()) {
             Board board = byId.get();

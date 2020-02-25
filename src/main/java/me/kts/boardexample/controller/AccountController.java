@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.validation.Valid;
-import java.security.Principal;
 
 @Controller
 @RequestMapping(value = "/account")
@@ -25,12 +24,11 @@ public class AccountController {
     }
 
     @GetMapping("/detail")
-    public String detail(Model model,
-                         Principal principal) {
-        String id = principal.getName();
-        Account account = service.getInfo(id);
+    public String detail(Model model) {
+        Account account = service.getInfo();
         if (account == null) {
             model.addAttribute("message", "fail to get user info");
+            return "index";
         } else {
             model.addAttribute("account", account);
         }
@@ -50,18 +48,12 @@ public class AccountController {
     }
 
     @PostMapping("/detail")
-    public String update(Principal principal,
-                         RedirectAttributes attributes,
+    public String update(RedirectAttributes attributes,
                          @Valid Account account) {
-        String id = principal.getName();
-        if (account.getId().equals(id)) {
-            if (service.updateInfo(account)) {
-                attributes.addFlashAttribute("message", "update success");
-            } else {
-                attributes.addFlashAttribute("message", "update fail");
-            }
+        if (service.updateInfo(account)) {
+            attributes.addFlashAttribute("message", "update success");
         } else {
-            attributes.addFlashAttribute("message", "wrong user");
+            attributes.addFlashAttribute("message", "update fail");
         }
         return "redirect:/account/detail";
     }

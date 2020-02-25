@@ -3,6 +3,7 @@ package me.kts.boardexample.service;
 import lombok.extern.slf4j.Slf4j;
 import me.kts.boardexample.domain.Account;
 import me.kts.boardexample.repository.AccountRepository;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -16,7 +17,6 @@ import java.util.Optional;
 @Slf4j
 public class AccountService implements UserDetailsService {
 
-    private final String ACCOUNT = "id";
     private final AccountRepository repository;
     private final PasswordEncoder passwordEncoder;
 
@@ -34,11 +34,19 @@ public class AccountService implements UserDetailsService {
         }
     }
 
-    public Account getInfo(String id) {
+    public Account getInfo() {
+        UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String id = principal.getUsername();
         return repository.findById(id).orElse(null);
     }
 
     public boolean updateInfo(Account account) {
+        UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String username = principal.getUsername();
+        if (!username.equals(account.getId())) {
+            return false;
+        }
+
         Account byId = repository.findById(account.getId()).orElse(null);
         if (byId != null) {
             byId.setPassword(account.getPassword());

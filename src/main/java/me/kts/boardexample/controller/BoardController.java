@@ -12,9 +12,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
-import java.security.Principal;
 
 @Slf4j
 @Controller
@@ -56,7 +54,6 @@ public class BoardController {
     public String create(
             RedirectAttributes attributes,
             @Valid BoardDto boardDto,
-            HttpSession session,
             BindingResult bindingResult) {
 
         if (bindingResult.hasErrors()) {
@@ -66,7 +63,7 @@ public class BoardController {
             return "redirect:/board/create";
         }
 
-        if (service.create(session.getAttribute("id").toString(), boardDto)) {
+        if (service.create(boardDto)) {
             attributes.addFlashAttribute("message", "게시글 생성 성공");
             return "redirect:/board/list";
         } else {
@@ -78,14 +75,12 @@ public class BoardController {
     public String update(RedirectAttributes attributes,
                          @PathVariable String boardId,
                          @Valid BoardDto boardDto,
-                         BindingResult bindingResult,
-                         Principal principal) {
-        String id = principal.getName();
+                         BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             bindingResult.getFieldErrors().forEach(c -> {
                 attributes.addFlashAttribute("message", c.getField() + " : " + c.getDefaultMessage());
             });
-        } else if (service.update(id, boardDto, boardId)) {
+        } else if (service.update(boardDto, boardId)) {
             attributes.addFlashAttribute("message", "update success");
         } else {
             attributes.addFlashAttribute("message", "update fail");
@@ -96,10 +91,8 @@ public class BoardController {
 
     @GetMapping("/delete/{boardId}")
     public String delete(RedirectAttributes attributes,
-                         @PathVariable String boardId,
-                         Principal principal) {
-        String userId = principal.getName();
-        if (service.delete(userId, boardId)) {
+                         @PathVariable String boardId) {
+        if (service.delete(boardId)) {
             attributes.addFlashAttribute("message", "delete success");
             return "redirect:/board/list";
         } else {
@@ -111,10 +104,8 @@ public class BoardController {
     @PostMapping("/comment/{boardId}")
     public String createComment(@PathVariable String boardId,
                                 @Valid CommentDto commentDto,
-                                RedirectAttributes attributes,
-                                Principal principal) {
-        String userId = principal.getName();
-        if (service.createComment(userId, boardId, commentDto.getComment())) {
+                                RedirectAttributes attributes) {
+        if (service.createComment(boardId, commentDto.getComment())) {
             attributes.addFlashAttribute("message", "create comment success");
         } else {
             attributes.addFlashAttribute("message", "create comment fail");
@@ -126,11 +117,9 @@ public class BoardController {
     public String updateComment(RedirectAttributes attributes,
                                 @PathVariable String boardId,
                                 @PathVariable String commentId,
-                                @Valid CommentDto commentDto,
-                                Principal principal) {
-        String id = principal.getName();
+                                @Valid CommentDto commentDto) {
         String message;
-        if (service.updateComment(id, commentId, boardId, commentDto.getComment())) {
+        if (service.updateComment(commentId, boardId, commentDto.getComment())) {
             message = "update comment success";
         } else {
             message = "update comment fail";
@@ -142,11 +131,9 @@ public class BoardController {
     @GetMapping("/delete/{boardId}/comment/{commentId}")
     public String deleteComment(RedirectAttributes attributes,
                                 @PathVariable String boardId,
-                                @PathVariable String commentId,
-                                Principal principal) {
-        String id = principal.getName();
+                                @PathVariable String commentId) {
         String message;
-        if (service.deleteComment(id, boardId, commentId)) {
+        if (service.deleteComment(boardId, commentId)) {
             message = "delete comment success";
         } else {
             message = "delete comment fail";
