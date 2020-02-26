@@ -9,8 +9,8 @@ import org.springframework.data.domain.Persistable;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 @Document
 @Data
@@ -27,7 +27,7 @@ public class Board implements Persistable<String> {
 
     private String content;
 
-    private List<Comment> comments = new ArrayList<>();
+    private Map<String, Comment> comments = new HashMap<>();
 
     @CreatedBy
     private String createdBy;
@@ -42,10 +42,6 @@ public class Board implements Persistable<String> {
     private String lastModifiedDate;
 
     private boolean persisted = false;
-
-    public void addComment(Comment comment) {
-        this.comments.add(comment);
-    }
 
     @Override
     public String toString() {

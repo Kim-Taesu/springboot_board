@@ -3,31 +3,27 @@ package me.kts.boardexample.service;
 import me.kts.boardexample.domain.Board;
 import me.kts.boardexample.domain.BoardDto;
 import me.kts.boardexample.domain.Comment;
-import me.kts.boardexample.repository.BoardCustomRepository;
 import me.kts.boardexample.repository.BoardRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
 public class BoardService {
 
     private final BoardRepository repository;
-    private final BoardCustomRepository customRepository;
-    private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yy. MM. dd a HH:mm");
 
-    public BoardService(BoardRepository repository, BoardCustomRepository customRepository) {
+    private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yy. MM. dd a HH:mm:ss");
+
+    public BoardService(BoardRepository repository) {
         this.repository = repository;
-        this.customRepository = customRepository;
     }
-
 
     public List<Board> viewAll() {
         return repository.findAll();
@@ -90,22 +86,26 @@ public class BoardService {
         return byId.orElse(null);
     }
 
-    public boolean createComment(String id, String content) {
+    public boolean createComment(String boardId, String content) {
         String userId = getUserId();
-        Optional<Board> byId = repository.findById(id);
+        Optional<Board> byId = repository.findById(boardId);
         if (byId.isPresent()) {
             Board board = byId.get();
 
+            Map<String, Comment> comments = board.getComments();
+            String localTime = getTime();
+            String commentKey = boardId + userId + localTime.replaceAll("\\.", "");
             Comment comment = Comment.builder()
-                    .commentId(board.getBoardId() + userId + LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+                    .commentId(commentKey)
+                    .boardId(boardId)
                     .userId(userId)
                     .content(content)
                     .createdBy(userId)
                     .lastModifiedBy(userId)
-                    .createDate(getTime())
-                    .lastModifiedDate(getTime())
+                    .createDate(localTime)
+                    .lastModifiedDate(localTime)
                     .build();
-            board.addComment(comment);
+            comments.put(commentKey, comment);
             board.setPersisted(true);
             repository.save(board);
             return true;
@@ -128,19 +128,16 @@ public class BoardService {
         Optional<Board> byId = repository.findById(boardId);
         if (byId.isPresent()) {
             Board board = byId.get();
-            List<Comment> comments = board.getComments();
-            for (Comment comment : comments) {
-                if (comment.getCommentId().equals(commentId)) {
-                    if (comment.getCommentId().equals(userId + comment.getContent())) {
-                        comment.setCommentId(userId + newContent);
-                        comment.setContent(newContent);
-                        comment.setLastModifiedBy(userId);
-                        comment.setLastModifiedDate(getTime());
-                        board.setPersisted(true);
-                        repository.save(board);
-                        return true;
-                    }
-                }
+            Map<String, Comment> comments = board.getComments();
+            Comment comment = comments.get(commentId);
+            if (comment.getCreatedBy().equals(userId) || comment.getCreatedBy().equals(board.getCreatedBy())) {
+                comment.setContent(newContent);
+                comment.setLastModifiedBy(userId);
+                comment.setLastModifiedDate(getTime());
+                comments.put(commentId, comment);
+                board.setPersisted(true);
+                repository.save(board);
+                return true;
             }
         }
         return false;
@@ -151,15 +148,13 @@ public class BoardService {
         Optional<Board> byId = repository.findById(boardId);
         if (byId.isPresent()) {
             Board board = byId.get();
-            List<Comment> comments = board.getComments();
-            for (Comment comment : comments) {
-                System.out.println(comment.getCommentId() + " : " + commentId);
-                if (comment.getCommentId().equals(commentId)) {
-                    if (comment.getUserId().equals(userId) || board.getCreatedBy().equals(userId)) {
-                        customRepository.deleteComment(userId, boardId, commentId, comment.getCreateDate());
-                        return true;
-                    }
-                }
+            Map<String, Comment> comments = board.getComments();
+            Comment comment = comments.get(commentId);
+            if (comment.getCreatedBy().equals(userId) || comment.getCreatedBy().equals(board.getCreatedBy())) {
+                comments.remove(commentId);
+                board.setPersisted(true);
+                repository.save(board);
+                return true;
             }
         }
         return false;
