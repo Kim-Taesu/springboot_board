@@ -11,8 +11,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 @Service
 @Slf4j
 public class AccountService implements UserDetailsService {
@@ -26,23 +24,22 @@ public class AccountService implements UserDetailsService {
     }
 
     public boolean signUpCheck(Account account) {
-        Optional<Account> byId = repository.findById(account.getId());
-        if (byId.isPresent()) {
-            return false;
-        } else {
-            return true;
-        }
+        assert account.getId() != null;
+        return repository.findById(account.getId()).orElse(null) == null;
     }
 
     public Account getInfo() {
-        UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String id = principal.getUsername();
+        String id = getUsername();
         return repository.findById(id).orElse(null);
     }
 
-    public boolean updateInfo(Account account) {
+    private String getUsername() {
         UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String username = principal.getUsername();
+        return principal.getUsername();
+    }
+
+    public boolean updateInfo(Account account) {
+        String username = getUsername();
         if (!username.equals(account.getId())) {
             return false;
         }
@@ -63,11 +60,10 @@ public class AccountService implements UserDetailsService {
     }
 
     public boolean deleteUser(String accountId) {
-        UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (principal.getUsername().equals(accountId)) {
+        String username = getUsername();
+        if (username.equals(accountId)) {
             try {
                 repository.deleteById(accountId);
-                SecurityContextHolder.clearContext();
             } catch (Exception e) {
                 return false;
             }
@@ -84,6 +80,7 @@ public class AccountService implements UserDetailsService {
         if (account == null) {
             throw new UsernameNotFoundException(id);
         }
+        assert account.getId() != null;
         return User.builder()
                 .username(account.getId())
                 .password(account.getPassword())
@@ -98,6 +95,7 @@ public class AccountService implements UserDetailsService {
             account.encodePassword(passwordEncoder);
             repository.save(account);
         } catch (Exception e) {
+            log.error(e.toString());
             return false;
         }
         return true;

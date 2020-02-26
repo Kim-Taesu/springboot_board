@@ -10,6 +10,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -37,13 +39,14 @@ public class BoardService {
         if (byId.isPresent()) {
             return false;
         } else {
+            long count = repository.count();
             Board board = Board.builder()
                     .title(boardDto.getTitle())
                     .content(boardDto.getContent())
                     .createdBy(userId)
                     .lastModifiedBy(userId)
+                    .boardId(String.valueOf(count))
                     .build();
-            board.makeId(board.getCreatedBy(), board.getTitle());
             repository.save(board);
             return true;
         }
@@ -92,8 +95,9 @@ public class BoardService {
         Optional<Board> byId = repository.findById(id);
         if (byId.isPresent()) {
             Board board = byId.get();
+
             Comment comment = Comment.builder()
-                    .commentId(userId + content)
+                    .commentId(board.getBoardId() + userId + LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
                     .userId(userId)
                     .content(content)
                     .createdBy(userId)
@@ -149,6 +153,7 @@ public class BoardService {
             Board board = byId.get();
             List<Comment> comments = board.getComments();
             for (Comment comment : comments) {
+                System.out.println(comment.getCommentId() + " : " + commentId);
                 if (comment.getCommentId().equals(commentId)) {
                     if (comment.getUserId().equals(userId) || board.getCreatedBy().equals(userId)) {
                         customRepository.deleteComment(userId, boardId, commentId, comment.getCreateDate());

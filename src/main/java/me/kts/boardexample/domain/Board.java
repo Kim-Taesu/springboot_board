@@ -54,6 +54,7 @@ public class Board implements Persistable<String> {
     }
 
     public void makeId(String userId, String title) {
+        title.replaceAll(" ", "");
         this.setBoardId(userId + title);
     }
 

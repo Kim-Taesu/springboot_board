@@ -3,15 +3,14 @@ package me.kts.boardexample.controller;
 import lombok.extern.slf4j.Slf4j;
 import me.kts.boardexample.domain.Account;
 import me.kts.boardexample.service.AccountService;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
-import java.util.Enumeration;
 
 @Controller
 @RequestMapping(value = "/account")
@@ -40,9 +39,9 @@ public class AccountController {
     @GetMapping("/delete/{accountId}")
     public String delete(@PathVariable String accountId,
                          RedirectAttributes attributes,
-                         HttpSession session,
                          Model model) {
         if (service.deleteUser(accountId)) {
+            SecurityContextHolder.clearContext();
             attributes.addFlashAttribute("message", "delete success");
             return "redirect:/account/loginPage";
         } else {
@@ -63,11 +62,7 @@ public class AccountController {
     }
 
     @GetMapping("/loginPage")
-    public String loginPage(HttpSession session) {
-        Enumeration<String> attributeNames = session.getAttributeNames();
-        while (attributeNames.hasMoreElements()) {
-            System.out.println(attributeNames.nextElement());
-        }
+    public String loginPage() {
         return "account/login";
     }
 
