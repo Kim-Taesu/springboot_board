@@ -39,8 +39,6 @@ public class BoardService {
             Board board = Board.builder()
                     .title(boardDto.getTitle())
                     .content(boardDto.getContent())
-                    .createdBy(userId)
-                    .lastModifiedBy(userId)
                     .boardId(String.valueOf(count))
                     .build();
             repository.save(board);
@@ -72,7 +70,6 @@ public class BoardService {
             if (board.getCreatedBy().equals(userId)) {
                 board.setTitle(newBoard.getTitle());
                 board.setContent(newBoard.getContent());
-                board.setLastModifiedBy(userId);
                 board.setPersisted(true);
                 repository.save(board);
                 return true;
@@ -130,7 +127,7 @@ public class BoardService {
             Board board = byId.get();
             Map<String, Comment> comments = board.getComments();
             Comment comment = comments.get(commentId);
-            if (comment.getCreatedBy().equals(userId) || comment.getCreatedBy().equals(board.getCreatedBy())) {
+            if (comment.getCreatedBy().equals(userId)) {
                 comment.setContent(newContent);
                 comment.setLastModifiedBy(userId);
                 comment.setLastModifiedDate(getTime());
@@ -150,7 +147,7 @@ public class BoardService {
             Board board = byId.get();
             Map<String, Comment> comments = board.getComments();
             Comment comment = comments.get(commentId);
-            if (comment.getCreatedBy().equals(userId) || comment.getCreatedBy().equals(board.getCreatedBy())) {
+            if (comment.getCreatedBy().equals(userId) || board.getCreatedBy().equals(userId)) {
                 comments.remove(commentId);
                 board.setPersisted(true);
                 repository.save(board);

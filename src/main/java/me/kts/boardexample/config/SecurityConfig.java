@@ -36,8 +36,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         http.logout()
                 .logoutUrl("/account/logout")
-                .logoutSuccessUrl("/");
-//                .invalidateHttpSession(true);
+                .logoutSuccessUrl("/")
+                .deleteCookies()
+                .invalidateHttpSession(true);
 
         http.exceptionHandling()
                 .accessDeniedHandler((request, response, e) -> {
@@ -46,7 +47,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     System.out.println(username + " is denied to access " + request.getRequestURI());
                     response.sendRedirect("/access-denied");
                 });
-//                .accessDeniedPage("access-denied");
 
         http.sessionManagement()
                 .sessionFixation().changeSessionId()

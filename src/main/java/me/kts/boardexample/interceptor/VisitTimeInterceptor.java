@@ -20,14 +20,11 @@ public class VisitTimeInterceptor implements HandlerInterceptor {
         HttpSession session = request.getSession();
         String VISIT_TIME = "visitTime";
         String USE_TIME = "useTime";
-        String ACCOUNT = "id";
 
         // 인증됨
         if (request.getUserPrincipal() != null) {
             log.info(request.getRemoteAddr() + " | " + "User " + request.getUserPrincipal().getName() + " requests " + request.getRequestURI());
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy년 M월 d일 a h시 m분 s초");
-
-            request.getSession().setAttribute(ACCOUNT, request.getUserPrincipal().getName());
 
             // 첫번 째 접근 시 방문 시각 저장
             if (session.getAttribute(VISIT_TIME) == null) {
@@ -39,7 +36,9 @@ public class VisitTimeInterceptor implements HandlerInterceptor {
             LocalDateTime visitTime = LocalDateTime.parse((CharSequence) session.getAttribute(VISIT_TIME), dateTimeFormatter);
             session.setAttribute(USE_TIME, ChronoUnit.MINUTES.between(visitTime, LocalDateTime.now()) + "분");
         } else {
-            log.info(request.getRemoteAddr() + " | " + "Anonymous User requests " + request.getRequestURI());
+            session.removeAttribute(VISIT_TIME);
+            session.removeAttribute(USE_TIME);
+            log.info("Anonymous User requests " + request.getRequestURI());
         }
         return true;
     }

@@ -2,9 +2,9 @@ package me.kts.boardexample.service;
 
 import lombok.extern.slf4j.Slf4j;
 import me.kts.boardexample.domain.Account;
+import me.kts.boardexample.domain.UserAccount;
 import me.kts.boardexample.repository.AccountRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -81,11 +81,7 @@ public class AccountService implements UserDetailsService {
             throw new UsernameNotFoundException(id);
         }
         assert account.getId() != null;
-        return User.builder()
-                .username(account.getId())
-                .password(account.getPassword())
-                .roles(account.getRole())
-                .build();
+        return new UserAccount(account);
     }
 
 

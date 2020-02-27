@@ -4,6 +4,7 @@ import me.kts.boardexample.common.BaseControllerTest;
 import me.kts.boardexample.domain.Account;
 import me.kts.boardexample.repository.AccountRepository;
 import me.kts.boardexample.service.AccountService;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpSession;
@@ -22,6 +23,11 @@ public class AccountControllerTest extends BaseControllerTest {
 
     @Autowired
     AccountRepository repository;
+
+    @Before
+    public void initDatabase() {
+        repository.deleteAll();
+    }
 
     @Test
     public void logout() throws Exception {
@@ -46,7 +52,7 @@ public class AccountControllerTest extends BaseControllerTest {
     public void loginPage() throws Exception {
         // when
         ResultActions actions = mockMvc
-                .perform(get("/account/login"))
+                .perform(get("/account/loginPage"))
                 .andDo(print());
         //then
         actions

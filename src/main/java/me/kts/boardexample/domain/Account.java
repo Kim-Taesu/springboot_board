@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.domain.Persistable;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,26 +24,34 @@ import javax.validation.constraints.NotNull;
 public class Account implements Persistable<String> {
     @Id
     @NotNull
-    String id;
+    private String id;
 
     @NotNull
-    String password;
+    private String password;
 
     @NotNull
-    String name;
+    private String name;
 
-    @NotNull @Min(0)
-    Integer age;
+    @NotNull
+    @Min(0)
+    private Integer age;
 
     @Email
-    String eMail;
+    private String eMail;
 
     @CreatedDate
-    String createdDate;
+    private String createdDate;
+
+    @LastModifiedDate
+    private String lastModifiedDate;
+
+    @LastModifiedBy
+    private String lastModifiedBy;
 
     private boolean persisted;
 
     private String role;
+
 
     public void encodePassword(PasswordEncoder passwordEncoder) {
         this.password = passwordEncoder.encode(password);

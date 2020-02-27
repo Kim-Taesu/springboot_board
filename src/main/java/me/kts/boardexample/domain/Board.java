@@ -43,12 +43,6 @@ public class Board implements Persistable<String> {
 
     private boolean persisted = false;
 
-    @Override
-    public String toString() {
-        return "생성 완료 (" +
-                "title: " + title + ')';
-    }
-
     public void makeId(String userId, String title) {
         title.replaceAll(" ", "");
         this.setBoardId(userId + title);
