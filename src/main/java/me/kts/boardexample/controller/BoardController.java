@@ -151,5 +151,4 @@ public class BoardController {
     public String exceptionController() {
         return "redirect:/board/list";
     }
-
 }

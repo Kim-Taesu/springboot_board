@@ -3,10 +3,12 @@ package me.kts.boardexample.config;
 import me.kts.boardexample.common.CustomLogoutHandler;
 import me.kts.boardexample.common.LoggingFilter;
 import me.kts.boardexample.service.AccountService;
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.expression.SecurityExpressionHandler;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -37,10 +39,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Override
+    public void configure(WebSecurity web) throws Exception {
+        web.ignoring().requestMatchers(PathRequest.toStaticResources().atCommonLocations());
+    }
+
+    @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
                 .mvcMatchers("/board/**", "/account/detail", "/account/logout", "/account/delete/**").hasRole("USER")
-                .mvcMatchers("/", "/account/loginPage", "/account/login").permitAll()
+                .mvcMatchers("/", "/account/loginPage", "/account/login", "/account/signUp").permitAll()
                 .anyRequest().authenticated()
                 .expressionHandler(expressionHandler());
 

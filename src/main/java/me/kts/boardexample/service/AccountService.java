@@ -2,9 +2,11 @@ package me.kts.boardexample.service;
 
 import lombok.extern.slf4j.Slf4j;
 import me.kts.boardexample.domain.Account;
+import me.kts.boardexample.domain.Idiot;
+import me.kts.boardexample.domain.IdiotDto;
 import me.kts.boardexample.domain.UserAccount;
 import me.kts.boardexample.repository.AccountRepository;
-import me.kts.boardexample.repository.AccountVisitRepository;
+import me.kts.boardexample.repository.IdiotRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -16,24 +18,23 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class AccountService implements UserDetailsService {
 
-    private final AccountRepository repository;
+    private final AccountRepository accountRepository;
     private final PasswordEncoder passwordEncoder;
-    private final AccountVisitRepository accountVisitRepository;
+    private final IdiotRepository idiotRepository;
 
-    public AccountService(AccountRepository repository, PasswordEncoder passwordEncoder, AccountVisitRepository accountVisitRepository) {
-        this.repository = repository;
+    public AccountService(AccountRepository accountRepository, PasswordEncoder passwordEncoder, IdiotRepository idiotRepository) {
+        this.accountRepository = accountRepository;
         this.passwordEncoder = passwordEncoder;
-        this.accountVisitRepository = accountVisitRepository;
+        this.idiotRepository = idiotRepository;
     }
 
     public boolean signUpCheck(Account account) {
-        assert account.getId() != null;
-        return repository.findById(account.getId()).orElse(null) == null;
+        return accountRepository.findById(account.getId()).orElse(null) == null;
     }
 
     public Account getInfo() {
         String id = getUsername();
-        return repository.findById(id).orElse(null);
+        return accountRepository.findById(id).orElse(null);
     }
 
     private String getUsername() {
@@ -47,7 +48,7 @@ public class AccountService implements UserDetailsService {
             return false;
         }
 
-        Account byId = repository.findById(account.getId()).orElse(null);
+        Account byId = accountRepository.findById(account.getId()).orElse(null);
         if (byId != null) {
             byId.setPassword(account.getPassword());
             byId.encodePassword(passwordEncoder);
@@ -55,7 +56,7 @@ public class AccountService implements UserDetailsService {
             byId.setAge(account.getAge());
             byId.setEMail(account.getEMail());
             byId.setPersisted(true);
-            repository.save(byId);
+            accountRepository.save(byId);
             return true;
         } else {
             return false;
@@ -66,7 +67,7 @@ public class AccountService implements UserDetailsService {
         String username = getUsername();
         if (username.equals(accountId)) {
             try {
-                repository.deleteById(accountId);
+                accountRepository.deleteById(accountId);
             } catch (Exception e) {
                 return false;
             }
@@ -79,7 +80,7 @@ public class AccountService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String id) throws UsernameNotFoundException {
-        Account account = repository.findById(id).orElse(null);
+        Account account = accountRepository.findById(id).orElse(null);
         if (account == null) {
             throw new UsernameNotFoundException(id);
         }
@@ -92,11 +93,49 @@ public class AccountService implements UserDetailsService {
         try {
             account.setRole("USER");
             account.encodePassword(passwordEncoder);
-            repository.save(account);
+            accountRepository.save(account);
         } catch (Exception e) {
             log.error(e.toString());
             return false;
         }
+        return true;
+    }
+
+
+    public boolean addIdiot(String idiotId, String boardId, String commentId, IdiotDto idiotDto) {
+        UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (commentId.equals("none")) {
+            Idiot isExist = idiotRepository.findByUserIdAndBoardIdAndIdiotId(principal.getUsername(), boardId, idiotId).orElse(null);
+            if (isExist != null)
+                return false;
+        } else {
+            Idiot isExist = idiotRepository.findByUserIdAndCommentIdAndIdiotId(principal.getUsername(), commentId, idiotId).orElse(null);
+            if (isExist != null)
+                return false;
+        }
+
+        Idiot idiot = Idiot.builder()
+                .idiotId(idiotId)
+                .boardId(boardId)
+                .title(idiotDto.getTitle())
+                .content(idiotDto.getContent())
+                .build();
+
+        if (!commentId.equals("none")) {
+            idiot.setCommentId(commentId);
+        }
+
+        idiot.makeId(principal.getUsername());
+        idiotRepository.save(idiot);
+
+        Account account = accountRepository.findById(idiotId).orElse(null);
+        if (account == null) {
+            return false;
+        }
+        account.setIdiotCount(account.getIdiotCount() + 1);
+        account.setPersisted(true);
+        accountRepository.save(account);
         return true;
     }
 }

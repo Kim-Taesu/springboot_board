@@ -71,6 +71,7 @@ public class AccountController {
         return "account/signUp";
     }
 
+
     @PostMapping("/signUp")
     public String signUp(Model model,
                          @Valid @ModelAttribute Account account,
@@ -90,5 +91,7 @@ public class AccountController {
         model.addAttribute("message", "signUp fail");
         return "/account/signUp";
     }
+
+
 }
 

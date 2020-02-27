@@ -87,6 +87,10 @@
         <button class="btn btn-warning" type="submit">게시글 수정</button>
         <a class="btn btn-danger" role="button"
            th:href="@{/board/delete/{boardId}(boardId=${board.getBoardId()})}">게시글 삭제</a>
+        <a class="btn btn-dark" role="button"
+           th:href="@{/idiot/{idiotId}/board/{boardId}/(idiotId=${board.getCreatedBy()},boardId=${board.getBoardId()})}"
+           th:if="${board.getCreatedBy() != #authentication.getPrincipal().getUsername()}">게시글
+            신고</a>
     </form>
     <hr/>
     <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
@@ -138,6 +142,10 @@
                         <a class="btn btn-danger"
                            th:href="@{/board/delete/{boardId}/comment/{commentId}(boardId=${board.getBoardId()},commentId=${comment.getValue().getCommentId()})}">댓글
                             삭제</a>
+                        <a class="btn btn-dark"
+                           th:href="@{/idiot/{accountId}/board/{boardId}/comment/{commentId}(boardId=${board.getBoardId()},commentId=${comment.getValue().getCommentId()},accountId=${comment.getValue().getCreatedBy()})}"
+                           th:if="${comment.getValue().getCreatedBy() != #authentication.getPrincipal().getUsername()}">댓글
+                            신고</a>
                     </div>
                 </div>
             </form>

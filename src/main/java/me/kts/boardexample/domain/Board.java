@@ -8,6 +8,7 @@ import org.springframework.data.annotation.*;
 import org.springframework.data.domain.Persistable;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.HashMap;
@@ -41,6 +42,9 @@ public class Board implements Persistable<String> {
 
     @LastModifiedDate
     private String lastModifiedDate;
+
+    @Min(0)
+    private Integer idiotCount = 0;
 
     private boolean persisted = false;
 
