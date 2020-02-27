@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Service
+
 public class BoardService {
 
     private final BoardRepository repository;
@@ -41,6 +42,7 @@ public class BoardService {
                     .content(boardDto.getContent())
                     .boardId(String.valueOf(count))
                     .build();
+            board.makeId(userId);
             repository.save(board);
             return true;
         }
@@ -51,7 +53,7 @@ public class BoardService {
         Optional<Board> byId = repository.findById(boardId);
         if (byId.isPresent()) {
             Board board = byId.get();
-            if (board.getCreatedBy().equals(userId)) {
+            if (board.getCreatedBy().equals(userId) || userId.equals("admin")) {
                 repository.deleteById(boardId);
                 return true;
             } else {
@@ -88,12 +90,8 @@ public class BoardService {
         Optional<Board> byId = repository.findById(boardId);
         if (byId.isPresent()) {
             Board board = byId.get();
-
-            Map<String, Comment> comments = board.getComments();
             String localTime = getTime();
-            String commentKey = boardId + userId + localTime.replaceAll("\\.", "");
             Comment comment = Comment.builder()
-                    .commentId(commentKey)
                     .boardId(boardId)
                     .userId(userId)
                     .content(content)
@@ -102,7 +100,7 @@ public class BoardService {
                     .createDate(localTime)
                     .lastModifiedDate(localTime)
                     .build();
-            comments.put(commentKey, comment);
+            board.addComment(userId, comment);
             board.setPersisted(true);
             repository.save(board);
             return true;
@@ -147,7 +145,7 @@ public class BoardService {
             Board board = byId.get();
             Map<String, Comment> comments = board.getComments();
             Comment comment = comments.get(commentId);
-            if (comment.getCreatedBy().equals(userId) || board.getCreatedBy().equals(userId)) {
+            if (comment.getCreatedBy().equals(userId) || board.getCreatedBy().equals(userId) || userId.equals("admin")) {
                 comments.remove(commentId);
                 board.setPersisted(true);
                 repository.save(board);

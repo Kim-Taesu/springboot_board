@@ -1,14 +1,16 @@
 package me.kts.boardexample.controller;
 
-import me.kts.boardexample.common.CurrentUser;
-import me.kts.boardexample.domain.Account;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import javax.servlet.http.HttpSession;
+
 @Controller
+@Slf4j
 public class IndexController {
     @GetMapping("/")
-    public String index(@CurrentUser Account account) {
+    public String index(HttpSession session) {
         return "index";
     }
 }

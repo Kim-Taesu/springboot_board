@@ -113,7 +113,7 @@ public class BoardControllerTest extends BaseControllerTest {
                 .content("content")
                 .createdBy(user)
                 .build();
-        board.makeId(board.getCreatedBy(), board.getTitle());
+        board.makeId(board.getCreatedBy());
 
         repository.save(board);
 
@@ -142,7 +142,7 @@ public class BoardControllerTest extends BaseControllerTest {
                 .content("content")
                 .createdBy(user + "dump")
                 .build();
-        board.makeId(board.getCreatedBy(), board.getTitle());
+        board.makeId(board.getCreatedBy());
 
         repository.save(board);
 
@@ -203,7 +203,7 @@ public class BoardControllerTest extends BaseControllerTest {
                 .content("content")
                 .createdBy("kts")
                 .build();
-        board.makeId(board.getCreatedBy(), board.getTitle());
+        board.makeId(board.getCreatedBy());
 
         repository.save(board);
 

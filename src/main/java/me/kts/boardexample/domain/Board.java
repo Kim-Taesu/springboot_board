@@ -9,6 +9,7 @@ import org.springframework.data.domain.Persistable;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.validation.constraints.NotNull;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,9 +44,8 @@ public class Board implements Persistable<String> {
 
     private boolean persisted = false;
 
-    public void makeId(String userId, String title) {
-        title.replaceAll(" ", "");
-        this.setBoardId(userId + title);
+    public void makeId(String userId) {
+        this.setBoardId(userId + new Date().getTime());
     }
 
     @Override
@@ -56,5 +56,11 @@ public class Board implements Persistable<String> {
     @Override
     public boolean isNew() {
         return !this.persisted;
+    }
+
+    public void addComment(String userId, Comment comment) {
+        String commentKey = this.boardId + userId + new Date().getTime();
+        comment.setCommentId(commentKey);
+        comments.put(commentKey, comment);
     }
 }

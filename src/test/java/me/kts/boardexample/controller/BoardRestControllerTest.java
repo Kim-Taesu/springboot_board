@@ -37,7 +37,7 @@ public class BoardRestControllerTest extends BaseControllerTest {
                     .createdBy("kts")
                     .lastModifiedBy("kts")
                     .build();
-            board.makeId(board.getCreatedBy(), board.getTitle());
+            board.makeId(board.getCreatedBy());
             repository.save(board);
         }
     }

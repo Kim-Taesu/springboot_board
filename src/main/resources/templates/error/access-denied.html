@@ -4,9 +4,36 @@
       xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>500 Error</title>
+    <title>Access Denied</title>
+    <link crossorigin="anonymous" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" rel="stylesheet">
 </head>
 <body>
-<h1><span sec:authentication="name">Name</span>, you are not allowed to access to the page.</h1>
+<h1>Access Denied</h1>
+<div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom shadow-sm"
+     id="page-header">
+    <a class="my-0 mr-md-auto text-dark" href="/">Home</a>
+
+    <nav class="my-2 my-md-0 mr-md-3" sec:authorize="isAuthenticated()">
+        <span class="p-2 text-dark">
+            <span sec:authentication="name"></span> 님 환영합니다.
+        </span>
+        <span class="p-2 text-dark" th:text="'방문시각 : '+${session['visitTime']}">Visit</span>
+        <span class="p-2 text-dark" th:text="'사용시간 : '+${session['useTime']}">Use</span>
+    </nav>
+
+    <div sec:authorize="isAuthenticated()">
+        <form action="/account/logout" method="post" th:action="@{/account/logout}">
+            <button class="btn btn-outline-danger" type="submit">Logout</button>
+        </form>
+    </div>
+</div>
+<div class="container" id="page-content">
+    <div class="jumbotron">
+        <h1>권한 없음</h1>
+        <span class="lead" sec:authentication="name">Name</span>, you are not allowed to access to the page.
+        <a class="btn btn-lg btn-primary" href="/" role="button">Home »</a>
+    </div>
+</div>
 </body>
 </html>

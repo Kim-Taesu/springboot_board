@@ -18,10 +18,8 @@ public class LoggingFilter extends GenericFilterBean {
     public void doFilter(ServletRequest request, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start(((HttpServletRequest) request).getRequestURI());
-
         filterChain.doFilter(request, servletResponse);
-
         stopWatch.stop();
-        log.info(stopWatch.prettyPrint());
+        log.info(stopWatch.getTotalTimeNanos() + "ns");
     }
 }

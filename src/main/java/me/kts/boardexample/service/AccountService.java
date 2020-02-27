@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import me.kts.boardexample.domain.Account;
 import me.kts.boardexample.domain.UserAccount;
 import me.kts.boardexample.repository.AccountRepository;
+import me.kts.boardexample.repository.AccountVisitRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -17,10 +18,12 @@ public class AccountService implements UserDetailsService {
 
     private final AccountRepository repository;
     private final PasswordEncoder passwordEncoder;
+    private final AccountVisitRepository accountVisitRepository;
 
-    public AccountService(AccountRepository repository, PasswordEncoder passwordEncoder) {
+    public AccountService(AccountRepository repository, PasswordEncoder passwordEncoder, AccountVisitRepository accountVisitRepository) {
         this.repository = repository;
         this.passwordEncoder = passwordEncoder;
+        this.accountVisitRepository = accountVisitRepository;
     }
 
     public boolean signUpCheck(Account account) {
