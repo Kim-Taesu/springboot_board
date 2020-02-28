@@ -2,11 +2,8 @@ package me.kts.boardexample.service;
 
 import lombok.extern.slf4j.Slf4j;
 import me.kts.boardexample.domain.Account;
-import me.kts.boardexample.domain.Idiot;
-import me.kts.boardexample.domain.IdiotDto;
 import me.kts.boardexample.domain.UserAccount;
 import me.kts.boardexample.repository.AccountRepository;
-import me.kts.boardexample.repository.IdiotRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -20,12 +17,10 @@ public class AccountService implements UserDetailsService {
 
     private final AccountRepository accountRepository;
     private final PasswordEncoder passwordEncoder;
-    private final IdiotRepository idiotRepository;
 
-    public AccountService(AccountRepository accountRepository, PasswordEncoder passwordEncoder, IdiotRepository idiotRepository) {
+    public AccountService(AccountRepository accountRepository, PasswordEncoder passwordEncoder) {
         this.accountRepository = accountRepository;
         this.passwordEncoder = passwordEncoder;
-        this.idiotRepository = idiotRepository;
     }
 
     public boolean signUpCheck(Account account) {
@@ -102,40 +97,4 @@ public class AccountService implements UserDetailsService {
     }
 
 
-    public boolean addIdiot(String idiotId, String boardId, String commentId, IdiotDto idiotDto) {
-        UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        if (commentId.equals("none")) {
-            Idiot isExist = idiotRepository.findByUserIdAndBoardIdAndIdiotId(principal.getUsername(), boardId, idiotId).orElse(null);
-            if (isExist != null)
-                return false;
-        } else {
-            Idiot isExist = idiotRepository.findByUserIdAndCommentIdAndIdiotId(principal.getUsername(), commentId, idiotId).orElse(null);
-            if (isExist != null)
-                return false;
-        }
-
-        Idiot idiot = Idiot.builder()
-                .idiotId(idiotId)
-                .boardId(boardId)
-                .title(idiotDto.getTitle())
-                .content(idiotDto.getContent())
-                .build();
-
-        if (!commentId.equals("none")) {
-            idiot.setCommentId(commentId);
-        }
-
-        idiot.makeId(principal.getUsername());
-        idiotRepository.save(idiot);
-
-        Account account = accountRepository.findById(idiotId).orElse(null);
-        if (account == null) {
-            return false;
-        }
-        account.setIdiotCount(account.getIdiotCount() + 1);
-        account.setPersisted(true);
-        accountRepository.save(account);
-        return true;
-    }
 }

@@ -50,12 +50,11 @@
 
             <td th:text="${item.getUserId()}"></td>
 
-            <td th:if="${item.getCommentId()==null}">
-                <a th:href="@{/board/detail/{boardId}(boardId=${item.getBoardId()})}"
-                   th:text="게시글"></a>
+            <td th:if="${item.getIdiotType()=='board'}"
+                th:text="게시글">
             </td>
-            <td th:if="${item.getCommentId()!=null}">
-                <a th:href="@{/board/detail/{boardId}(boardId=${item.getBoardId()})}" th:text="댓글"></a>
+            <td th:if="${item.getIdiotType()=='comment'}"
+                th:text="댓글">
             </td>
 
             <td th:text="${item.getTitle()}"></td>
@@ -66,6 +65,7 @@
     </table>
 
     <button class="btn btn-primary" onclick="location.href='/'" type="button">HOME</button>
+    <button class="btn btn-success" onclick="location.href='/idiot/list'" type="button">Idiot List</button>
 </div>
 </body>
 

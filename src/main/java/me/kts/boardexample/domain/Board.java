@@ -11,8 +11,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 @Document
 @Data
@@ -28,8 +26,6 @@ public class Board implements Persistable<String> {
     private String title;
 
     private String content;
-
-    private Map<String, Comment> comments = new HashMap<>();
 
     @CreatedBy
     private String createdBy;
@@ -60,11 +56,5 @@ public class Board implements Persistable<String> {
     @Override
     public boolean isNew() {
         return !this.persisted;
-    }
-
-    public void addComment(String userId, Comment comment) {
-        String commentKey = this.boardId + userId + new Date().getTime();
-        comment.setCommentId(commentKey);
-        comments.put(commentKey, comment);
     }
 }

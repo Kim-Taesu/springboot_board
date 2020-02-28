@@ -21,13 +21,17 @@ import java.util.Date;
 public class Idiot implements Persistable<String> {
 
     @Id
+    @NotNull
     String id;
 
+    @NotNull
     String idiotId;
 
-    String boardId;
+    @NotNull
+    Object idiotDetail;
 
-    String commentId;
+    @NotNull
+    String idiotType;
 
     @NotNull
     String title;

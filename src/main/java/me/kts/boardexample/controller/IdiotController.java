@@ -1,9 +1,8 @@
 package me.kts.boardexample.controller;
 
 import me.kts.boardexample.domain.IdiotDto;
-import me.kts.boardexample.repository.AccountRepository;
 import me.kts.boardexample.repository.IdiotRepository;
-import me.kts.boardexample.service.AccountService;
+import me.kts.boardexample.service.IdiotService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,19 +17,17 @@ import javax.validation.Valid;
 @RequestMapping("/idiot")
 public class IdiotController {
 
-    private final AccountRepository accountRepository;
-    private final AccountService accountService;
+    private final IdiotService idiotService;
     private final IdiotRepository idiotRepository;
 
-    public IdiotController(AccountRepository accountRepository, AccountService accountService, IdiotRepository idiotRepository) {
-        this.accountRepository = accountRepository;
-        this.accountService = accountService;
+    public IdiotController(IdiotService idiotService, IdiotRepository idiotRepository) {
+        this.idiotService = idiotService;
         this.idiotRepository = idiotRepository;
     }
 
     @GetMapping("/list")
     public String idiotsPage(Model model) {
-        model.addAttribute("list", accountRepository.findByIdiotCountGreaterThan(0));
+        model.addAttribute("list", idiotService.getIdiots());
         return "idiot/list";
     }
 
@@ -46,33 +43,36 @@ public class IdiotController {
                                            @PathVariable String idiotId,
                                            @PathVariable String boardId) {
         model.addAttribute("idiotId", idiotId);
-        model.addAttribute("boardId", boardId);
-        model.addAttribute("commentId", "none");
+        model.addAttribute("type", "board");
+        model.addAttribute("typeId", boardId);
         return "idiot/idiot-create";
     }
 
-    @GetMapping("/{idiotId}/board/{boardId}/comment/{commentId}")
+    @GetMapping("/{idiotId}/comment/{commentId}")
     public String createIdiotPageFromComment(Model model,
                                              @PathVariable String idiotId,
-                                             @PathVariable String boardId,
                                              @PathVariable String commentId) {
         model.addAttribute("idiotId", idiotId);
-        model.addAttribute("boardId", boardId);
+        model.addAttribute("type", "comment");
         model.addAttribute("commentId", commentId);
         return "idiot/idiot-create";
     }
 
-    @PostMapping("/{idiotId}/board/{boardId}/comment/{commentId}")
+    @PostMapping("/{idiotId}/{type}/{typeId}")
     public String addIdiot(RedirectAttributes attributes,
                            @PathVariable String idiotId,
-                           @PathVariable String boardId,
-                           @PathVariable String commentId,
+                           @PathVariable String type,
+                           @PathVariable String typeId,
                            @Valid IdiotDto IdiotDto) {
-        if (accountService.addIdiot(idiotId, boardId, commentId, IdiotDto)) {
+        if (idiotService.addIdiot(idiotId, type, typeId, IdiotDto)) {
             attributes.addFlashAttribute("message", "신고 완료");
         } else {
             attributes.addFlashAttribute("message", "신고 오류");
         }
-        return "redirect:/board/detail/" + boardId;
+        if (type.equals("comment")) {
+            return "redirect:/board/detail/" + idiotService.getBoardId(typeId);
+        } else {
+            return "redirect:/board/detail/" + typeId;
+        }
     }
 }

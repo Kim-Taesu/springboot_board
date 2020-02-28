@@ -84,84 +84,83 @@
                        type="text">
             </div>
         </div>
-        <button class="btn btn-warning" type="submit">게시글 수정</button>
-        <a class="btn btn-danger" role="button"
-           th:href="@{/board/delete/{boardId}(boardId=${board.getBoardId()})}">게시글 삭제</a>
-        <a class="btn btn-dark" role="button"
-           th:href="@{/idiot/{idiotId}/board/{boardId}/(idiotId=${board.getCreatedBy()},boardId=${board.getBoardId()})}"
-           th:if="${board.getCreatedBy() != #authentication.getPrincipal().getUsername()}">게시글
-            신고</a>
+
+        <div th:if="${board.getCreatedBy()== #authentication.getPrincipal().getUsername()}">
+            <button class="btn btn-warning" type="submit">게시글 수정</button>
+            <a class="btn btn-danger" role="button"
+               th:href="@{/board/delete/{boardId}(boardId=${board.getBoardId()})}">게시글 삭제</a>
+        </div>
+        <div th:if="${board.getCreatedBy()!= #authentication.getPrincipal().getUsername()}">
+            <a class="btn btn-dark" role="button"
+               th:href="@{/idiot/{idiotId}/board/{boardId}/(idiotId=${board.getCreatedBy()},boardId=${board.getBoardId()})}">게시글
+                신고</a>
+        </div>
     </form>
     <hr/>
     <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
         <h3 class="display-4">Comments</h3>
     </div>
-    <div th:unless="${#lists.isEmpty(board.getComments())}">
-        <ul th:each="comment: ${board.getComments()}">
-            <form th:action="@{/board/update/{boardId}/comment/{commentId}(commentId=${comment.getValue().getCommentId()},boardId=${board.getBoardId()})}"
+    <div th:unless="${#lists.isEmpty(comments)}">
+        <ul th:each="comment: ${comments}">
+            <form th:action="@{/comment/update/{commentId}(commentId=${comment.getCommentId()})}"
                   th:method="post">
                 <div class="card">
                     <div class="card-body">
+                        <h5 class="card-title" th:name="userId" th:text="${comment.getCreatedBy()}">Card
+                            title</h5>
 
                         <div class="form-group row">
-                            <label class="col-sm-2 col-form-label" for="lastModifiedDate">사용자</label>
                             <div class="col-sm-10">
-                                <input class="form-control-plaintext" id="userId" name="userId" readonly
-                                       th:value="${comment.getValue().getUserId()}"
-                                       type="text">
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="col-sm-2 col-form-label" for="commentContent">Comment</label>
-                            <div class="col-sm-10">
-                                <input class="form-control" id="commentContent" name="comment"
-                                       th:value="${comment.getValue().getContent()}"
-                                       type="text">
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="col-sm-2 col-form-label" for="commentCreatedDate">Create Date</label>
-                            <div class="col-sm-10">
-                                <input class="form-control-plaintext" id="commentCreatedDate" name="createDate" readonly
-                                       th:value="${comment.getValue().getCreateDate()}"
+                                <input class="form-control" name="comment"
+                                       th:if="${comment.getCreatedBy()== #authentication.getPrincipal().getUsername()}"
+                                       th:value="${comment.getContent()}"
                                        type="text">
                             </div>
                         </div>
 
                         <div class="form-group row">
-                            <label class="col-sm-2 col-form-label" for="commentUpdateDate">Update Date</label>
                             <div class="col-sm-10">
-                                <input class="form-control-plaintext" id="commentUpdateDate" name="lastModifiedDate"
-                                       readonly
-                                       th:value="${comment.getValue().getLastModifiedDate()}"
-                                       type="text">
+                                <input class="form-control-plaintext" name="comment"
+                                       th:if="${comment.getCreatedBy() != #authentication.getPrincipal().getUsername()}"
+                                       th:value="${comment.getContent()}">
                             </div>
                         </div>
 
-                        <button class="btn btn-warning" type="submit">댓글 수정</button>
+                        <h6 class="card-subtitle mb-2 text-muted" th:name="createDate"
+                            th:text="'생성: '+${comment.getCreateDate()}">Card subtitle</h6>
+                        <h6 class="card-subtitle mb-2 text-muted" th:name="createDate"
+                            th:text="'수정: '+${comment.getLastModifiedDate()}">Card subtitle</h6>
+
+                        <input class="form-control" name="boardId" th:value="${board.getBoardId()}" type="hidden">
+
+                        <button class="btn btn-warning"
+                                th:if="${comment.getCreatedBy() == #authentication.getPrincipal().getUsername()}" type="submit">댓글 수정
+                        </button>
                         <a class="btn btn-danger"
-                           th:href="@{/board/delete/{boardId}/comment/{commentId}(boardId=${board.getBoardId()},commentId=${comment.getValue().getCommentId()})}">댓글
+                           th:href="@{/comment/delete/{commentId}/board/{boardId}(commentId=${comment.getCommentId()},boardId=${comment.getBoardId()})}"
+                           th:if="${comment.getCreatedBy() == #authentication.getPrincipal().getUsername() ||
+                           board.getCreatedBy() == #authentication.getPrincipal().getUsername() }">댓글
                             삭제</a>
                         <a class="btn btn-dark"
-                           th:href="@{/idiot/{accountId}/board/{boardId}/comment/{commentId}(boardId=${board.getBoardId()},commentId=${comment.getValue().getCommentId()},accountId=${comment.getValue().getCreatedBy()})}"
-                           th:if="${comment.getValue().getCreatedBy() != #authentication.getPrincipal().getUsername()}">댓글
-                            신고</a>
+                           th:href="@{/idiot/{accountId}/comment/{commentId}(commentId=${comment.getCommentId()},accountId=${comment.getCreatedBy()})}"
+                           th:if="${comment.getCreatedBy() != #authentication.getPrincipal().getUsername()}">댓글 신고</a>
                     </div>
                 </div>
             </form>
 
         </ul>
     </div>
-    <div style="text-align: center" th:if="${#lists.isEmpty(board.getComments())}">
+    <div style="text-align: center" th:if="${#lists.isEmpty(comments)}">
         <td colspan="3" style="text-align: center">조회된 결과가 없습니다.</td>
     </div>
     <hr/>
-    <form action="#" th:action="@{/board/comment/{boardId}(boardId=${board.getBoardId()})}" th:method="post">
+    <form action="#" th:action="@{/comment/create}" th:method="post">
         <div class="form-group row">
             <label class="col-sm-2 col-form-label" for="comment">content</label>
             <div class="col-sm-10">
                 <input class="form-control" id="comment" name="comment" placeholder="댓글을 입력하세요" required type="text">
             </div>
+            <input class="form-control" name="boardId" th:value="${board.getBoardId()}" type="hidden">
         </div>
         <button class="btn btn-success" type="submit">댓글 달기</button>
     </form>

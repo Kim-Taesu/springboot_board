@@ -32,7 +32,7 @@
         <h1 class="display-4">Idiot Create Page</h1>
     </div>
 
-    <form th:action="@{/idiot/{idiotId}/board/{boardId}/comment/{commentId}(idiotId=${idiotId},commentId=${commentId},boardId=${boardId})}"
+    <form th:action="@{/idiot/{idiotId}/{type}/{typeId}(idiotId=${idiotId},type=${type},typeId=${typeId})}"
           th:method="post">
         <div class="form-group">
             <label for="title">Title</label>

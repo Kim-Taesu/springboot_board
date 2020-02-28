@@ -12,4 +12,7 @@ import javax.validation.constraints.NotNull;
 public class CommentDto {
     @NotNull
     String comment;
+
+    @NotNull
+    String boardId;
 }
