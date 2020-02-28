@@ -1,32 +1,43 @@
-# springboot_board
-게시판 예제
+## 게시판 예제
+
+
+
+사용 기술
+
+- Spring Boot
+- Spring Security
+- Spring JPA
+- MongoDB
+
+
 
 기능
-  - Account
+
+  - Account 관련
+    
     - 로그인
+    - 로그아웃
+    - 회원 정보 수정
+    - 회원 탈퇴
     
-      ![image-20200223223724316](image/login.png)
-    
-    - 로그 아웃 및 기본 index 화면
-    
-      ![image-20200223223749002](image/index.png)
-    
-    - 회원 가입
-    
-      ![image-20200223223757920](image/signup.png)
-    
-    - 회원 정보 변경, 회원 삭제
-    
-      ![image-20200223223811627](image/user-detail.png)
-  - Board
-    - 게시판 목록
-    
-      ![image-20200223223906145](image/board-list.png)
-    
-    - 게시판 생성
-    
-      ![image-20200223223913991](image/board-create.png)
-    
-    - 게시판 수정, 삭제   |   댓글 추가, 수정, 삭제
-    
-      ![image-20200223223923320](image/board-detail.png)
+- Board 관련
+
+  - 게시글 생성
+  - 게시글 수정
+  - 게시글 삭제
+  - 게시글 신고
+
+- Comment 관련
+
+  - 댓글 생성
+  - 댓글 수정
+  - 댓글 삭제
+
+  - 댓글 신고
+
+- Admin 관련
+
+  - 전체 사용자 목록 확인
+  - 신고 사용자 목록 확인
+    - 신고 타입(게시글, 댓글) 확인
+  - 사용자 관리(사용자 계정 수정 및 삭제)

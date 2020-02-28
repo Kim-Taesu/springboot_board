@@ -54,7 +54,7 @@ public class IdiotController {
                                              @PathVariable String commentId) {
         model.addAttribute("idiotId", idiotId);
         model.addAttribute("type", "comment");
-        model.addAttribute("commentId", commentId);
+        model.addAttribute("typeId", commentId);
         return "idiot/idiot-create";
     }
 

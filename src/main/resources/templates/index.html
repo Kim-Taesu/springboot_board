@@ -64,14 +64,23 @@
         <div class="jumbotron">
             <h1>Account Detail</h1>
             <p class="lead">사용자 정보</p>
-            <a class="btn btn-lg btn-info" href="/account/detail" role="button">View Account Detail »</a>
+            <a class="btn btn-lg btn-info" role="button" th:href="@{'/account/detail/'+${#authentication.getName()}}">View
+                Account Detail »</a>
+        </div>
+    </div>
+
+    <div sec:authorize="hasRole('ROLE_ADMIN')">
+        <div class="jumbotron">
+            <h1>User List</h1>
+            <p class="lead">전체 사용자 목록</p>
+            <a class="btn btn-lg btn-dark" href="/account/list" role="button">View User List »</a>
         </div>
     </div>
 
     <div sec:authorize="hasRole('ROLE_ADMIN')">
         <div class="jumbotron">
             <h1>Idiot User List</h1>
-            <p class="lead">신고 사용자 정보</p>
+            <p class="lead">신고 사용자 목록</p>
             <a class="btn btn-lg btn-dark" href="/idiot/list" role="button">View Idiot User List »</a>
         </div>
     </div>

@@ -35,9 +35,9 @@ public class AppConfig implements ApplicationRunner {
         log.info("init database");
 //        accountRepository.deleteAll();
 //        boardRepository.deleteAll();
-        idiotRepository.deleteAll();
-        commentRepository.deleteAll();
-        accountVisitRepository.deleteAll();
+//        idiotRepository.deleteAll();
+//        commentRepository.deleteAll();
+//        accountVisitRepository.deleteAll();
 
         log.info("add admin account");
         Optional<Account> byId = accountRepository.findById("admin");

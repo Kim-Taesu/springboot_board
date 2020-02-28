@@ -1,5 +1,6 @@
 package me.kts.boardexample.config;
 
+import me.kts.boardexample.common.CustomAccessDeniedHandler;
 import me.kts.boardexample.common.CustomLogoutHandler;
 import me.kts.boardexample.common.LoggingFilter;
 import me.kts.boardexample.service.AccountService;
@@ -12,8 +13,6 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler;
 import org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter;
 
@@ -23,10 +22,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final AccountService accountService;
     private final CustomLogoutHandler customLogoutHandler;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
-    public SecurityConfig(AccountService accountService, CustomLogoutHandler customLogoutHandler) {
+    public SecurityConfig(AccountService accountService, CustomLogoutHandler customLogoutHandler, CustomAccessDeniedHandler customAccessDeniedHandler) {
         this.accountService = accountService;
         this.customLogoutHandler = customLogoutHandler;
+        this.customAccessDeniedHandler = customAccessDeniedHandler;
     }
 
     public SecurityExpressionHandler expressionHandler() {
@@ -47,6 +48,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
                 .mvcMatchers("/board/**", "/account/detail", "/account/logout", "/account/delete/**").hasRole("USER")
+                .mvcMatchers("/account/list", "/idiot/list", "/idiot/detail/**").hasRole("ADMIN")
                 .mvcMatchers("/", "/account/loginPage", "/account/login", "/account/signUp").permitAll()
                 .anyRequest().authenticated()
                 .expressionHandler(expressionHandler());
@@ -66,18 +68,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .invalidateHttpSession(true);
 
         http.exceptionHandling()
-                .accessDeniedHandler((request, response, e) -> {
-                    UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-                    String username = principal.getUsername();
-                    System.out.println(username + " is denied to access " + request.getRequestURI());
-                    response.sendRedirect("/access-denied");
-                });
+                .accessDeniedHandler(customAccessDeniedHandler);
 
         http.sessionManagement()
                 .sessionFixation().changeSessionId()
                 .invalidSessionUrl("/account/loginPage")
                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                .maximumSessions(1).maxSessionsPreventsLogin(false);
+                .maximumSessions(1)
+                .maxSessionsPreventsLogin(false);
 
         http.rememberMe()
                 .userDetailsService(accountService)

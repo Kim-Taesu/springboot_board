@@ -96,6 +96,15 @@
             </div>
         </div>
 
+        <div class="form-group row">
+            <label class="col-sm-2 col-form-label" for="idiotCount">신고 누적</label>
+            <div class="col-sm-10">
+                <input class="form-control-plaintext" id="idiotCount" name="idiotCount"
+                       readonly
+                       th:value="*{getIdiotCount()}" type="number">
+            </div>
+        </div>
+
         <button class="btn btn-warning" type="submit">수정</button>
         <a class="btn btn-danger" role="button" th:href="@{/account/delete/{accountId}(accountId=${account.getId()})}">삭제</a>
     </form>

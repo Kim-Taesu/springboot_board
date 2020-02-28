@@ -18,42 +18,43 @@ import javax.validation.Valid;
 public class AccountController {
 
 
-    private final AccountService service;
+    private final AccountService accountService;
 
-    public AccountController(AccountService service) {
-        this.service = service;
+    public AccountController(AccountService accountService) {
+        this.accountService = accountService;
     }
 
-    @GetMapping("/detail")
-    public String detail(Model model) {
-        Account account = service.getInfo();
+    @GetMapping("/detail/{userId}")
+    public String detail(Model model,
+                         @PathVariable String userId) {
+        Account account = accountService.getInfo(userId);
         if (account == null) {
             model.addAttribute("message", "fail to get user info");
             return "index";
         } else {
             model.addAttribute("account", account);
         }
-        return "account/user-detail";
+        return "account/detail";
     }
 
     @GetMapping("/delete/{accountId}")
     public String delete(@PathVariable String accountId,
                          RedirectAttributes attributes,
                          Model model) {
-        if (service.deleteUser(accountId)) {
+        if (accountService.deleteUser(accountId)) {
             SecurityContextHolder.clearContext();
             attributes.addFlashAttribute("message", "delete success");
             return "redirect:/account/loginPage";
         } else {
             model.addAttribute("message", "delete fail");
-            return "account/user-detail";
+            return "account/detail";
         }
     }
 
     @PostMapping("/detail")
     public String update(RedirectAttributes attributes,
                          @Valid Account account) {
-        if (service.updateInfo(account)) {
+        if (accountService.updateInfo(account)) {
             attributes.addFlashAttribute("message", "update success");
         } else {
             attributes.addFlashAttribute("message", "update fail");
@@ -82,14 +83,20 @@ public class AccountController {
             });
             return "/account/signUp";
         }
-        if (service.signUpCheck(account)) {
-            if (service.signUp(account)) {
+        if (accountService.signUpCheck(account)) {
+            if (accountService.signUp(account)) {
                 model.addAttribute("message", "signUp success");
                 return "account/login";
             }
         }
         model.addAttribute("message", "signUp fail");
         return "/account/signUp";
+    }
+
+    @GetMapping("/list")
+    public String AccountList(Model model) {
+        model.addAttribute("list", accountService.getUsers());
+        return "/account/list";
     }
 
 

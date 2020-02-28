@@ -44,6 +44,8 @@ public class Account implements Persistable<String> {
     @LastModifiedDate
     private String lastModifiedDate;
 
+    private String recentAccess;
+
     @Min(0)
     private Integer idiotCount = 0;
 
