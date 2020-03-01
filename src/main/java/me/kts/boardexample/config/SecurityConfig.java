@@ -1,9 +1,9 @@
 package me.kts.boardexample.config;
 
-import me.kts.boardexample.common.CustomAccessDeniedHandler;
-import me.kts.boardexample.common.CustomLogoutHandler;
-import me.kts.boardexample.common.CustomOauthHandler;
-import me.kts.boardexample.common.LoggingFilter;
+import me.kts.boardexample.filter.LoggingFilter;
+import me.kts.boardexample.handler.CustomAccessDeniedHandler;
+import me.kts.boardexample.handler.CustomLogoutHandler;
+import me.kts.boardexample.handler.CustomOauthHandler;
 import me.kts.boardexample.service.AccountService;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;

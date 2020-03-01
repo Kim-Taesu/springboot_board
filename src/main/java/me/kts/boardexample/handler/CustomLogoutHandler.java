@@ -1,4 +1,4 @@
-package me.kts.boardexample.common;
+package me.kts.boardexample.handler;
 
 import me.kts.boardexample.domain.Account;
 import me.kts.boardexample.domain.AccountVisit;

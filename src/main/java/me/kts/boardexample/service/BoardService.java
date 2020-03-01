@@ -3,8 +3,6 @@ package me.kts.boardexample.service;
 import me.kts.boardexample.domain.Board;
 import me.kts.boardexample.domain.BoardDto;
 import me.kts.boardexample.repository.BoardRepository;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -89,21 +87,4 @@ public class BoardService {
         UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return principal.getUsername();
     }
-
-
-    public boolean addIdiotBoard(String boardId) {
-        Board board = repository.findById(boardId).orElse(null);
-        if (board == null) {
-            return false;
-        }
-        board.setIdiotCount(board.getIdiotCount() + 1);
-        board.setPersisted(true);
-        repository.save(board);
-        return true;
-    }
-
-    public Page<Board> getIdiotBoard(Pageable pageable) {
-        return repository.findByIdiotCountGreaterThan(0, pageable);
-    }
-
 }
