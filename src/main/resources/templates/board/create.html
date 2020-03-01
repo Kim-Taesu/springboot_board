@@ -16,6 +16,7 @@
     </span>
     <span class="p-2 text-dark" th:text="'방문시각 : '+${session['visitTime']}">Visit</span>
     <span class="p-2 text-dark" th:text="'사용시간 : '+${session['useTime']}">Use</span>
+
     <form action="/account/logout" th:action="@{/account/logout}" th:method="post">
         <button class="btn btn-outline-danger" type="submit">Logout</button>
     </form>

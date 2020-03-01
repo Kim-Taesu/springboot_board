@@ -31,7 +31,6 @@ public class Account implements Persistable<String> {
     @NotNull
     private String name;
 
-    @NotNull
     @Min(0)
     private Integer age;
 

@@ -14,7 +14,10 @@
     <a class="my-0 mr-md-auto text-dark" href="/">Home</a>
 
     <nav class="my-2 my-md-0 mr-md-3" sec:authorize="isAuthenticated()">
-        <span class="p-2 text-dark">
+        <span class="p-2 text-dark" th:if="${#lists.size(#authentication.principal.authorities) > 1}">
+            <span th:text="${#authentication.principal.attributes.name}"></span> 님 환영합니다.
+        </span>
+        <span class="p-2 text-dark" th:unless="${#lists.size(#authentication.principal.authorities) > 1}">
             <span sec:authentication="name"></span> 님 환영합니다.
         </span>
         <span class="p-2 text-dark" th:text="'방문시각 : '+${session['visitTime']}">Visit</span>
@@ -61,12 +64,19 @@
             <a class="btn btn-lg btn-primary" href="/board/list" role="button">View Board List »</a>
         </div>
 
-        <div class="jumbotron">
+        <div class="jumbotron" sec:authorize="hasRole('ROLE_USER')">
             <h1>Account Detail</h1>
             <p class="lead">사용자 정보</p>
             <a class="btn btn-lg btn-info" role="button" th:href="@{'/account/detail/'+${#authentication.getName()}}">View
                 Account Detail »</a>
         </div>
+
+        <!--        <div class="jumbotron" sec:authorize="hasRole('ROLE_OAUTH')">-->
+        <!--            <h1>Account Detail</h1>-->
+        <!--            <p class="lead">사용자 정보</p>-->
+        <!--            <a class="btn btn-lg btn-info" role="button" th:href="@{'/account/detail/'+${#authentication.getName()}}">View-->
+        <!--                Account Detail »</a>-->
+        <!--        </div>-->
     </div>
 
     <div sec:authorize="hasRole('ROLE_ADMIN')">

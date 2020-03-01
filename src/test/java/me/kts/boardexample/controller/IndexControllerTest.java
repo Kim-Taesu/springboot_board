@@ -1,6 +1,7 @@
 package me.kts.boardexample.controller;
 
 import me.kts.boardexample.common.BaseControllerTest;
+import me.kts.boardexample.common.TestDescription;
 import org.junit.Test;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -12,6 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class IndexControllerTest extends BaseControllerTest {
 
     @Test
+    @TestDescription("홈 화면")
     public void index() throws Exception {
         ResultActions actions = mockMvc.perform(get("/"))
                 .andDo(print());

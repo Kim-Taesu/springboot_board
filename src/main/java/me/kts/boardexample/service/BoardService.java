@@ -66,6 +66,8 @@ public class BoardService {
         Optional<Board> byId = repository.findById(boardId);
         if (byId.isPresent()) {
             Board board = byId.get();
+            System.out.println("createdBy : " + board.getCreatedBy());
+            System.out.println("updatedBy : " + userId);
             if (board.getCreatedBy().equals(userId)) {
                 board.setTitle(newBoard.getTitle());
                 board.setContent(newBoard.getContent());

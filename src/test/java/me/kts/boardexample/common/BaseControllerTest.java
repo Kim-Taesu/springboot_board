@@ -19,6 +19,4 @@ public class BaseControllerTest {
     protected MockMvc mockMvc;
     @Autowired
     protected ObjectMapper objectMapper;
-
-
 }

@@ -1,16 +1,19 @@
 package me.kts.boardexample.controller;
 
 import me.kts.boardexample.common.BaseControllerTest;
+import me.kts.boardexample.common.CustomMockUser;
 import me.kts.boardexample.domain.Account;
 import me.kts.boardexample.repository.AccountRepository;
 import me.kts.boardexample.service.AccountService;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mock.web.MockHttpSession;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.ResultActions;
 
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestBuilders.formLogin;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -18,31 +21,33 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 public class AccountControllerTest extends BaseControllerTest {
 
+    private final String id = "id";
     @Autowired
     AccountService service;
-
     @Autowired
-    AccountRepository repository;
+    PasswordEncoder passwordEncoder;
+    @Autowired
+    AccountRepository accountRepository;
 
     @Before
     public void initDatabase() {
-        repository.deleteAll();
+        accountRepository.deleteAll();
     }
 
     @Test
-    public void logout() throws Exception {
-        Account account = buildAccount("test", "test", "test", 26, "akvks456@gmail.com");
-        repository.save(account);
+    @CustomMockUser
+    public void logout_test() throws Exception {
+        // Given
+        Account account = buildAccount();
+        accountRepository.save(account);
 
-        MockHttpSession session = new MockHttpSession();
-        session.setAttribute("id", account.getId());
-        assertThat(session.getAttribute("id")).isNotNull();
-
-        ResultActions actions = mockMvc
-                .perform(get("/account/logout")
-                        .session(session))
+        // When
+        ResultActions actions = mockMvc.perform(post("/account/logout")
+                .with(csrf())
+        )
                 .andDo(print());
 
+        // Then
         actions
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/"));
@@ -50,11 +55,11 @@ public class AccountControllerTest extends BaseControllerTest {
 
     @Test
     public void loginPage() throws Exception {
-        // when
+        // When
         ResultActions actions = mockMvc
                 .perform(get("/account/loginPage"))
                 .andDo(print());
-        //then
+        // Then
         actions
                 .andExpect(status().isOk())
                 .andExpect(view().name("account/login"));
@@ -62,11 +67,11 @@ public class AccountControllerTest extends BaseControllerTest {
 
     @Test
     public void signUpPage() throws Exception {
-        // when
+        // When
         ResultActions actions = mockMvc
                 .perform(get("/account/signUp"))
                 .andDo(print());
-        //then
+        // Then
         actions
                 .andExpect(status().isOk())
                 .andExpect(view().name("account/signUp"));
@@ -75,134 +80,133 @@ public class AccountControllerTest extends BaseControllerTest {
     @Test
     public void login_fail_by_id() throws Exception {
 
-        // given
-        String id = "id";
-        String password = "password";
+        // Given
+        Account account = buildAccount();
+        accountRepository.save(account);
 
-        Account account = buildAccount(id, password);
-        repository.save(account);
-
-        // when
+        // When
         ResultActions actions = mockMvc.perform(post("/account/login")
-                .param("id", id + "dump")
-                .param("password", password))
+                .param("id", account.getId() + "dump")
+                .param("password", account.getPassword()))
                 .andDo(print());
 
-        // then
+        // Then
         actions
                 .andExpect(status().is3xxRedirection())
-                .andExpect(view().name("redirect:/account/login"));
+                .andExpect(redirectedUrl("/account/loginPage"));
     }
 
     @Test
     public void login_fail_by_password() throws Exception {
 
-        // given
-        String id = "id";
-        String password = "password";
+        // Given
+        Account account = buildAccount();
+        accountRepository.save(account);
 
-        Account account = buildAccount(id, password);
-        repository.save(account);
-
-        // when
+        // When
         ResultActions actions = mockMvc.perform(post("/account/login")
-                .param("id", id)
-                .param("password", password + "dump"))
+                .param("id", account.getId())
+                .param("password", account.getPassword() + "dump"))
                 .andDo(print());
 
-        // then
+        // Then
         actions
                 .andExpect(status().is3xxRedirection())
-                .andExpect(view().name("redirect:/account/login"));
+                .andExpect(redirectedUrl("/account/loginPage"));
     }
 
     @Test
     public void login_success() throws Exception {
 
-        // given
-        String id = "id";
+        // Given
+        Account account = buildAccount();
         String password = "password";
+        account.setPassword(password);
+        account.encodePassword(passwordEncoder);
+        accountRepository.save(account);
 
-        Account account = buildAccount(id, password);
-        repository.save(account);
-
-        // when
-        ResultActions actions = mockMvc.perform(post("/account/login")
-                .param("id", id)
-                .param("password", password))
+        // When
+        ResultActions actions = mockMvc.perform(formLogin()
+                .loginProcessingUrl("/account/login")
+                .userParameter("id")
+                .user(account.getId())
+                .password(password)
+        )
                 .andDo(print());
 
-        // then
+        // Then
         actions
+                .andExpect(authenticated())
                 .andExpect(status().is3xxRedirection())
-                .andExpect(view().name("redirect:/"));
+                .andExpect(redirectedUrl("/"));
     }
 
-    private Account buildAccount(String id, String password) {
-        return Account.builder()
-                .id(id)
-                .password(password)
-                .build();
-    }
+    private Account buildAccount() {
 
-    private Account buildAccount(String id, String password, String name, Integer age, String eMail) {
-        return Account.builder()
+        String password = "password";
+        Account account = Account.builder()
                 .id(id)
                 .password(password)
-                .age(age)
-                .eMail(eMail)
-                .name(name)
+                .age(1)
+                .name(id)
+                .eMail("test@test.com")
                 .build();
+        account.encodePassword(passwordEncoder);
+        return account;
     }
 
     @Test
     public void signUp_fail_invalid_data() throws Exception {
-        Account account = buildAccount("kts_test", "kts_test");
-        // when
+        // When
         ResultActions actions = mockMvc.perform(post("/account/signUp")
-                .param("id", account.getId())
-                .param("password", account.getPassword()))
+                .param("id", "id")
+                .param("password", "password")
+                .with(csrf()))
                 .andDo(print());
 
-        // then
+        // Then
         actions
-                .andExpect(status().is3xxRedirection())
-                .andExpect(view().name("redirect:/account/signUp"));
+                .andExpect(status().isOk())
+                .andExpect(view().name("/account/signUp"));
     }
 
     @Test
     public void signUp_fail_id_duplicate() throws Exception {
-        Account account = buildAccount("kts_test", "kts_test", "kts", 26, "akvks456@gmail.com");
-        repository.save(account);
+        Account account = buildAccount();
+        accountRepository.save(account);
 
-        // when
-        ResultActions actions = mockMvc.perform(post("/account/signUp")
-                .param("id", account.getId())
-                .param("password", account.getPassword())
-                .param("name", account.getName())
-                .param("age", account.getAge().toString()))
-                .andDo(print());
-
-        // then
-        actions
-                .andExpect(status().is3xxRedirection())
-                .andExpect(view().name("redirect:/account/signUp"));
-    }
-
-    @Test
-    public void signUp_success() throws Exception {
-        Account account = buildAccount("signup_test3", "signup_test2", "kts", 26, "akvks456@gmail.com");
-
-        // when
+        // When
         ResultActions actions = mockMvc.perform(post("/account/signUp")
                 .param("id", account.getId())
                 .param("password", account.getPassword())
                 .param("name", account.getName())
                 .param("age", account.getAge().toString())
-                .param("eMail", account.getEMail()))
+                .param("eMail", account.getEMail())
+                .with(csrf())
+        )
                 .andDo(print());
 
-        // then
+        // Then
+        actions
+                .andExpect(status().isOk())
+                .andExpect(view().name("/account/signUp"));
+    }
+
+    @Test
+    public void signUp_success() throws Exception {
+        Account account = buildAccount();
+
+        // When
+        ResultActions actions = mockMvc.perform(post("/account/signUp")
+                .param("id", account.getId())
+                .param("password", account.getPassword())
+                .param("name", account.getName())
+                .param("age", account.getAge().toString())
+                .param("eMail", account.getEMail())
+                .with(csrf()))
+                .andDo(print());
+
+        // Then
         actions
                 .andExpect(status().isOk())
                 .andExpect(view().name("account/login"));
