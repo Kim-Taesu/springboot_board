@@ -14,6 +14,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.web.servlet.ResultActions;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -37,8 +38,9 @@ public class BoardRestControllerTest extends BaseControllerTest {
     @CustomMockUser
     @TestDescription("게시판 생성")
     public void createBoard_success() throws Exception {
+        // Given
         BoardDto boardDto = buildBoardDto();
-
+        // When
         ResultActions actions = mockMvc.perform(post("/board/api/create")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(boardDto))
@@ -46,7 +48,7 @@ public class BoardRestControllerTest extends BaseControllerTest {
                 .with(csrf())
         )
                 .andDo(print());
-
+        // Then
         actions
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("id").exists())
@@ -62,10 +64,11 @@ public class BoardRestControllerTest extends BaseControllerTest {
     @CustomMockUser
     @TestDescription("게시판 생성, 제목 또는 내용 없음")
     public void createBoard_fail_by_invalid_boardDto() throws Exception {
+        // Given
         BoardDto boardDto = BoardDto.builder()
                 .title("df")
                 .build();
-
+        // When
         ResultActions actions = mockMvc.perform(post("/board/api/create")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(boardDto))
@@ -73,7 +76,7 @@ public class BoardRestControllerTest extends BaseControllerTest {
                 .with(csrf())
         )
                 .andDo(print());
-
+        // Then
         actions
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("content[0].objectName").exists())
@@ -87,11 +90,12 @@ public class BoardRestControllerTest extends BaseControllerTest {
     @CustomMockUser
     @TestDescription("게시판 생성, 제목 또는 내용이 빈칸일 경우")
     public void createBoard_fail_by_invalid_boardDto2() throws Exception {
+        // Given
         BoardDto boardDto = BoardDto.builder()
                 .title("title")
                 .content("          ")
                 .build();
-
+        // When
         ResultActions actions = mockMvc.perform(post("/board/api/create")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(boardDto))
@@ -99,7 +103,7 @@ public class BoardRestControllerTest extends BaseControllerTest {
                 .with(csrf())
         )
                 .andDo(print());
-
+        // Then
         actions
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("content[0].objectName").exists())
@@ -121,15 +125,16 @@ public class BoardRestControllerTest extends BaseControllerTest {
     @TestDescription("30개의 게시판을 5개씩 생성하고 2번째 페이지 조회하기")
     @CustomMockUser
     public void boardList() throws Exception {
+        // Given
         generateBoard(100);
-
+        // When
         ResultActions actions = mockMvc.perform(get("/board/api/list")
                 .param("size", "5")
                 .param("page", "2")
                 .with(csrf())
         )
                 .andDo(print());
-
+        // Then
         actions
                 .andExpect(status().isOk());
     }
@@ -172,7 +177,7 @@ public class BoardRestControllerTest extends BaseControllerTest {
                 .with(csrf())
         )
                 .andDo(print());
-
+        // Then
         actions
                 .andExpect(status().isOk());
     }
@@ -183,12 +188,7 @@ public class BoardRestControllerTest extends BaseControllerTest {
     public void updateBoard_fail_by_not_matched_user() throws Exception {
         // Given
         String username = getUserName();
-        Board board = Board.builder()
-                .title("title")
-                .content("content")
-                .build();
-        board.makeId(username);
-        boardRepository.save(board);
+        Board board = buildBoard(username);
 
         BoardDto newBoardDto = BoardDto.builder()
                 .title("new title")
@@ -203,10 +203,60 @@ public class BoardRestControllerTest extends BaseControllerTest {
                 .with(user("id2").roles("USER"))
         )
                 .andDo(print());
-
+        // Then
         actions
                 .andExpect(status().isBadRequest());
     }
+
+    public Board buildBoard(String userId) {
+        Board board = Board.builder()
+                .title("title")
+                .content("content")
+                .build();
+        board.makeId(userId);
+        return boardRepository.save(board);
+    }
+
+    @Test
+    @TestDescription("게시글 상세 정보")
+    @CustomMockUser
+    public void boardDetail_success() throws Exception {
+        // Given
+        String userName = getUserName();
+        Board board = buildBoard(userName);
+
+        // When
+        ResultActions actions = mockMvc.perform(get("/board/api/detail/" + board.getBoardId())
+                .with(csrf())
+        )
+                .andDo(print());
+
+        // Then
+        actions
+                .andExpect(status().isOk())
+        ;
+    }
+
+    @Test
+    @TestDescription("게시글 상세 정보, 인증 안된 접근")
+    @WithAnonymousUser
+    public void boardDetail_fail_unauthenticated() throws Exception {
+        // Given
+        Board board = buildBoard("id");
+
+        // When
+        ResultActions actions = mockMvc.perform(get("/board/api/detail/" + board.getBoardId())
+                .with(csrf())
+        )
+                .andDo(print());
+
+        // Then
+        actions
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("http://localhost/account/loginPage"))
+        ;
+    }
+
 
     private String getUserName() {
         UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();

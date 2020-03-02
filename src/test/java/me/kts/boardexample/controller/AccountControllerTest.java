@@ -2,6 +2,7 @@ package me.kts.boardexample.controller;
 
 import me.kts.boardexample.common.BaseControllerTest;
 import me.kts.boardexample.common.CustomMockUser;
+import me.kts.boardexample.common.TestDescription;
 import me.kts.boardexample.domain.Account;
 import me.kts.boardexample.repository.AccountRepository;
 import me.kts.boardexample.service.AccountService;
@@ -36,7 +37,8 @@ public class AccountControllerTest extends BaseControllerTest {
 
     @Test
     @CustomMockUser
-    public void logout_test() throws Exception {
+    @TestDescription("로그아웃")
+    public void logout_success() throws Exception {
         // Given
         Account account = buildAccount();
         accountRepository.save(account);
@@ -53,7 +55,9 @@ public class AccountControllerTest extends BaseControllerTest {
                 .andExpect(redirectedUrl("/"));
     }
 
+
     @Test
+    @TestDescription("로그인 화면")
     public void loginPage() throws Exception {
         // When
         ResultActions actions = mockMvc
@@ -66,6 +70,7 @@ public class AccountControllerTest extends BaseControllerTest {
     }
 
     @Test
+    @TestDescription("회원가입 화면")
     public void signUpPage() throws Exception {
         // When
         ResultActions actions = mockMvc

@@ -73,4 +73,8 @@ public class BoardRestService {
         if (updateResult.getModifiedCount() == 0) return null;
         return mongoTemplate.findOne(new Query(Criteria.where("_id").is(boardId)), Board.class);
     }
+
+    public Board detail(String boardId) {
+        return boardRepository.findById(boardId).orElse(null);
+    }
 }

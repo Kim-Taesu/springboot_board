@@ -11,6 +11,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -71,6 +72,18 @@ public class BoardRestController {
         }
 
         BoardResource boardResource = new BoardResource(board);
+        return ResponseEntity.ok(boardResource);
+    }
+
+    @GetMapping("/detail/{boardId}")
+    public ResponseEntity detailBoard(@PathVariable String boardId) {
+        Board board = boardRestService.detail(boardId);
+        if (board == null) {
+            Link linkBuilder = linkTo(BoardRestController.class).slash("list").withRel("board-list");
+            return ResponseEntity.badRequest().body(linkBuilder);
+        }
+        BoardResource boardResource = new BoardResource(board);
+        boardResource.add(linkTo(BoardRestController.class).slash("list").withRel("board-list"));
         return ResponseEntity.ok(boardResource);
     }
 
