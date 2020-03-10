@@ -1,0 +1,11 @@
+server:
+  port: 0
+spring:
+  data:
+    mongodb:
+      port: 0
+  http:
+    encoding:
+      charset: utf-8
+      enabled: true
+      force: true

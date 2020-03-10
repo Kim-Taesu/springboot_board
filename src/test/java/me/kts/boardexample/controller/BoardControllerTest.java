@@ -28,7 +28,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 public class BoardControllerTest extends BaseControllerTest {
-
     private final String baseHostUrl = "http://localhost";
     private final String id = "id";
     private final String password = "password";
